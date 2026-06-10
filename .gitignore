@@ -1,5 +1,7 @@
 # Data files (large, binary, or generated — do not commit)
 *.csv
+# ...except real source/input data for the project (small, licensed)
+!Iteration*/input_files/data/*.csv
 *.npz
 *.npy
 *.pkl

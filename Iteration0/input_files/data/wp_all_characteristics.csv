@@ -1,0 +1,667 @@
+"time_period","time_identifier","geographic_level","country_code","country_name","breakdown_topic","breakdown","progression_rate","high_tariff_progression_rate","number_of_he_students","number_of_high_tariff_he_students","number_of_students"
+200910,"Academic year","National","E92000001","England","FSM Status","Free School Meals",18.6,2.9,14664,2297,78802
+200910,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",36.2,10.9,187028,56147,516955
+200910,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",11.2,1.6,9505,1391,84851
+200910,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",5.5,0.9,1348,224,24456
+200910,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",39.2,11.7,190839,56829,486450
+200910,"Academic year","National","E92000001","England","First Language","English",32.1,9.5,173362,51186,539478
+200910,"Academic year","National","E92000001","England","First Language","Other than English",50.8,13.1,28098,7217,55299
+200910,"Academic year","National","E92000001","England","First Language","Unclassified",23.7,4.2,232,41,980
+200910,"Academic year","National","E92000001","England","Sex","Female",37.8,10.7,110611,31325,292506
+200910,"Academic year","National","E92000001","England","Sex","Male",30,8.9,91081,27119,303251
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",31.3,9.3,151946,44909,485435
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",40.1,15.6,874,340,2180
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",8.7,1.6,11,2,126
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",3.4,0.6,11,2,324
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",41.7,14.1,5074,1717,12155
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",27.4,5,1392,255,5074
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",42.9,11.2,533,139,1242
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",50.1,20.6,1245,512,2486
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",39.5,12.5,1838,580,4652
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",67.3,21.9,9136,2973,13584
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",44.9,9.1,6269,1271,13971
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",46.4,9.7,2726,567,5872
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",57.6,19.8,2452,842,4260
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",34.2,4.2,2959,359,8644
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","African",53.9,9.2,5732,979,10631
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",36.9,5.9,989,158,2677
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",73.3,34.9,1622,771,2212
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",46.2,13.6,2338,686,5060
+200910,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",30,9.1,4545,1382,15172
+200910,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",18,3.1,22631,3949,125796
+200910,"Academic year","National","E92000001","England","POLAR","Q2",27.2,5.9,33113,7220,121530
+200910,"Academic year","National","E92000001","England","POLAR","Q3",34,8.7,40159,10291,118078
+200910,"Academic year","National","E92000001","England","POLAR","Q4",41.5,12.2,48520,14308,116979
+200910,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",51.3,20.4,56408,22460,110014
+200910,"Academic year","National","E92000001","England","POLAR","Unknown",25.6,6.4,861,216,3360
+200910,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",9,1,300,50,3500
+200910,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",34,10,201390,58400,592260
+200910,"Academic year","National","E92000001","England","SEN Status","Any special educational need",9.9,1.5,10853,1615,109307
+200910,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",39.2,11.7,190839,56829,486450
+200910,"Academic year","National","E92000001","England","Ethnicity Major","White",31.6,9.4,157916,46970,500220
+200910,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",37.2,11,5008,1486,13454
+200910,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",55.7,16.1,22205,6424,39899
+200910,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",44.1,6.8,9680,1496,21952
+200910,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",46.2,13.6,2338,686,5060
+200910,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",30,9.1,4545,1382,15172
+201011,"Academic year","National","E92000001","England","FSM Status","Free School Meals",19.8,2.9,15309,2243,77477
+201011,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",37.4,10.8,196494,56563,525143
+201011,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",12.5,1.8,11662,1697,93550
+201011,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",6.1,0.9,1464,215,24147
+201011,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",41,11.7,198677,56894,484923
+201011,"Academic year","National","E92000001","England","First Language","English",33.5,9.5,182270,51662,544253
+201011,"Academic year","National","E92000001","England","First Language","Other than English",50.9,12.2,28524,6865,56092
+201011,"Academic year","National","E92000001","England","First Language","Unclassified",44.4,12.3,1009,279,2275
+201011,"Academic year","National","E92000001","England","Sex","Female",39,10.6,115674,31461,296336
+201011,"Academic year","National","E92000001","England","Sex","Male",31.4,8.9,96129,27345,306284
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",32.6,9.2,160332,45445,491409
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",41.3,15.7,924,352,2237
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",3.1,0.6,5,1,162
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",3.8,1.1,14,4,372
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",41.3,13.5,5443,1778,13166
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",27.8,5.3,1573,300,5652
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",41.4,10.3,565,140,1365
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",50.7,17.8,1440,507,2842
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",42.4,13.4,2158,681,5087
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",67.7,21.7,9037,2893,13354
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",46.1,8.4,6704,1218,14558
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",48.8,8.5,2795,489,5730
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",55.1,17.6,2737,874,4969
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",37.3,4.4,3121,372,8376
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","African",54.4,9.3,6235,1065,11454
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",38.1,5.7,1021,153,2677
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",73.3,35.2,1581,759,2157
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",46.2,13,2490,698,5388
+201011,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",31.1,9.2,3628,1077,11665
+201011,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",19,3,24287,3891,127816
+201011,"Academic year","National","E92000001","England","POLAR","Q2",28.5,5.9,35251,7335,123501
+201011,"Academic year","National","E92000001","England","POLAR","Q3",35.5,8.7,42305,10309,119110
+201011,"Academic year","National","E92000001","England","POLAR","Q4",43,12.4,50874,14631,118276
+201011,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",52.6,20.3,58228,22449,110679
+201011,"Academic year","National","E92000001","England","POLAR","Unknown",26.5,5.9,858,191,3238
+201011,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",10,1,350,50,3490
+201011,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",35,10,211460,58760,599140
+201011,"Academic year","National","E92000001","England","SEN Status","Any special educational need",11.2,1.6,13126,1912,117697
+201011,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",41,11.7,198677,56894,484923
+201011,"Academic year","National","E92000001","England","Ethnicity Major","White",32.9,9.4,166718,47580,507346
+201011,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",38.4,10.9,5736,1628,14946
+201011,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",56.1,15.3,22854,6233,40768
+201011,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",46.1,7.1,10377,1590,22507
+201011,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",46.2,13,2490,698,5388
+201011,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",31.1,9.2,3628,1077,11665
+201112,"Academic year","National","E92000001","England","FSM Status","Free School Meals",20.3,3,15262,2284,75299
+201112,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",38.3,11.4,200879,59757,524696
+201112,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",14,2.2,14892,2375,106368
+201112,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",6.2,1,1472,230,23652
+201112,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",42.5,12.6,199777,59436,469975
+201112,"Academic year","National","E92000001","England","First Language","English",34.4,10.1,185463,54438,539593
+201112,"Academic year","National","E92000001","England","First Language","Other than English",51,12.6,29946,7390,58695
+201112,"Academic year","National","E92000001","England","First Language","Unclassified",42.9,12.5,732,213,1707
+201112,"Academic year","National","E92000001","England","Sex","Female",39.9,11.3,117219,33080,294043
+201112,"Academic year","National","E92000001","England","Sex","Male",32.3,9.5,98922,28961,305952
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",33.3,9.8,161720,47541,485452
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",44.2,16.7,940,356,2129
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",5.2,0,6,0,115
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",6,0.9,27,4,449
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",41,13,6349,2008,15468
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",28.7,5.5,1742,331,6067
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",41.9,12.3,669,197,1596
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",50.7,18.3,1576,569,3109
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",42.8,13.5,2366,743,5524
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",68.6,22.4,9276,3029,13527
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",46.4,9.1,7106,1401,15330
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",49.1,9.1,2883,536,5869
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",55.6,17,3190,974,5742
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",37.1,4.6,2962,364,7976
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","African",56.9,10.9,6891,1316,12112
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",42.3,6.4,1143,172,2705
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",74.2,34.7,1680,786,2263
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",46.5,13.1,2679,756,5759
+201112,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",33.4,10.9,2936,958,8803
+201112,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",19.6,3.3,24901,4232,127030
+201112,"Academic year","National","E92000001","England","POLAR","Q2",29.2,6.3,35647,7651,122191
+201112,"Academic year","National","E92000001","England","POLAR","Q3",36.7,9.4,43457,11191,118532
+201112,"Academic year","National","E92000001","England","POLAR","Q4",43.8,13,51762,15329,118293
+201112,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",53.7,21.1,59639,23461,111144
+201112,"Academic year","National","E92000001","England","POLAR","Unknown",26.2,6.3,735,177,2805
+201112,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",10,1,360,50,3680
+201112,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",36,10,215780,61990,596320
+201112,"Academic year","National","E92000001","England","SEN Status","Any special educational need",12.6,2,16364,2605,130020
+201112,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",42.5,12.6,199777,59436,469975
+201112,"Academic year","National","E92000001","England","Ethnicity Major","White",33.6,9.9,169042,49909,503613
+201112,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",39,11.3,6353,1840,16296
+201112,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",56.5,15.7,24135,6726,42731
+201112,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",48.2,8.1,10996,1852,22793
+201112,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",46.5,13.1,2679,756,5759
+201112,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",33.4,10.9,2936,958,8803
+201213,"Academic year","National","E92000001","England","FSM Status","Free School Meals",21.3,2.8,15927,2084,74636
+201213,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",38.8,10.2,196114,51357,505257
+201213,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",15.6,2.2,17925,2480,115048
+201213,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",6.6,0.9,1524,215,22936
+201213,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",43.6,11.5,192592,50746,441909
+201213,"Academic year","National","E92000001","England","First Language","English",34.8,9,180391,46581,518019
+201213,"Academic year","National","E92000001","England","First Language","Other than English",51.3,11.1,30901,6671,60260
+201213,"Academic year","National","E92000001","England","First Language","Unclassified",46.4,11.7,749,189,1614
+201213,"Academic year","National","E92000001","England","Sex","Female",40.5,10,115330,28343,284551
+201213,"Academic year","National","E92000001","England","Sex","Male",32.7,8.5,96711,25098,295342
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",33.6,8.7,155098,40082,462165
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",44.6,16,870,312,1951
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",8.1,1.6,10,2,124
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",3.6,0.4,18,2,497
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",40.4,11.1,6855,1890,16968
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",30.1,5.5,1884,344,6250
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",44.4,10.1,705,161,1588
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",51,17.7,1664,578,3264
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",44.7,12.7,2609,744,5838
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",68.2,20.1,9108,2682,13361
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",46.9,8,7534,1282,16067
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",50,8.7,3004,523,6004
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",56.4,14.9,3438,907,6101
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",37.9,4.1,3043,325,8021
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","African",59,8.8,7649,1147,12965
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",43,5.5,1154,147,2682
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",76.1,33.7,1739,770,2285
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",47.8,11,2955,679,6184
+201213,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",35.7,11.4,2704,864,7578
+201213,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",20.3,2.9,24811,3575,121995
+201213,"Academic year","National","E92000001","England","POLAR","Q2",29.5,5.4,34955,6361,118510
+201213,"Academic year","National","E92000001","England","POLAR","Q3",36.9,8.2,42325,9406,114722
+201213,"Academic year","National","E92000001","England","POLAR","Q4",44.6,11.6,51030,13263,114429
+201213,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",54.1,19.2,58252,20694,107764
+201213,"Academic year","National","E92000001","England","POLAR","Unknown",27,5.7,668,142,2473
+201213,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",9,1,350,30,3730
+201213,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",37,9,211690,53410,576170
+201213,"Academic year","National","E92000001","England","SEN Status","Any special educational need",14.1,2,19449,2695,137984
+201213,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",43.6,11.5,192592,50746,441909
+201213,"Academic year","National","E92000001","England","Ethnicity Major","White",33.8,8.8,162851,42288,481705
+201213,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",40.5,10.8,6862,1827,16940
+201213,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",56.7,14.1,24823,6164,43818
+201213,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",50.1,6.8,11846,1619,23668
+201213,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",47.8,11,2955,679,6184
+201213,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",35.7,11.4,2704,864,7578
+201314,"Academic year","National","E92000001","England","FSM Status","Free School Meals",22.3,3.1,17333,2415,77706
+201314,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",39.1,11.1,196091,55831,501925
+201314,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",22.2,3.3,30509,4472,137161
+201314,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",41.3,12.2,182915,53774,442470
+201314,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",16.5,2.4,20114,2890,121560
+201314,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",7.2,1.1,1611,249,22328
+201314,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",44,12.6,191699,55107,435743
+201314,"Academic year","National","E92000001","England","First Language","English",34.9,9.8,179404,50548,514123
+201314,"Academic year","National","E92000001","England","First Language","Other than English",52.2,11.7,33023,7426,63204
+201314,"Academic year","National","E92000001","England","First Language","Unclassified",43.3,11.8,997,272,2304
+201314,"Academic year","National","E92000001","England","Sex","Female",40.9,10.9,116174,30953,284086
+201314,"Academic year","National","E92000001","England","Sex","Male",32.9,9.2,97250,27293,295545
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",33.6,9.5,153649,43544,457453
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",47.7,17.9,964,361,2022
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",7.9,1.6,10,2,126
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",2.3,0,13,0,554
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",40.8,12,7469,2199,18293
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",29.8,5.7,1920,366,6444
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",45.8,12.9,777,219,1697
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",51.3,19.7,1807,695,3523
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",45.7,14.7,2959,952,6476
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",68.6,20.6,8999,2698,13116
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",48.5,8,7912,1310,16318
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",51.2,9.4,3334,613,6512
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",56,15.6,3718,1038,6641
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",37.1,4,2995,323,8063
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","African",60.1,10.1,8076,1358,13445
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",46.4,6.1,1295,169,2790
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",74.9,35.2,1670,785,2230
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",49,12.3,3294,828,6727
+201314,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",35.6,10.9,2563,786,7201
+201314,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",21.3,3.3,25466,3984,119660
+201314,"Academic year","National","E92000001","England","POLAR","Q2",30.2,6.1,35273,7172,116806
+201314,"Academic year","National","E92000001","England","POLAR","Q3",37.1,8.8,42983,10175,115793
+201314,"Academic year","National","E92000001","England","POLAR","Q4",44.1,12.3,50941,14150,115502
+201314,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",53,20.6,58081,22617,109584
+201314,"Academic year","National","E92000001","England","POLAR","Unknown",29.7,6.5,680,148,2286
+201314,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",10,1,380,40,3700
+201314,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",37,10,213050,58210,575930
+201314,"Academic year","National","E92000001","England","SEN Status","Any special educational need",15.1,2.2,21725,3139,143888
+201314,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",44,12.6,191699,55107,435743
+201314,"Academic year","National","E92000001","England","Ethnicity Major","White",33.9,9.6,162105,46106,478448
+201314,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",41.1,12.3,7463,2232,18140
+201314,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",57.2,14.4,25633,6444,44817
+201314,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",50.9,7.6,12366,1850,24298
+201314,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",49,12.3,3294,828,6727
+201314,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",35.6,10.9,2563,786,7201
+201415,"Academic year","National","E92000001","England","FSM Status","Free School Meals",24.1,3.7,19228,2942,79621
+201415,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",41.6,12.5,203263,60984,488595
+201415,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",24.6,3.9,32877,5227,133844
+201415,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",43.7,13.5,189614,58699,434372
+201415,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",18,2.6,20684,3013,114913
+201415,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",7.7,1.2,1684,259,21892
+201415,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",46.4,14.1,200123,60654,431411
+201415,"Academic year","National","E92000001","England","First Language","English",37,11,185009,54972,499950
+201415,"Academic year","National","E92000001","England","First Language","Other than English",55.3,13.2,36354,8675,65744
+201415,"Academic year","National","E92000001","England","First Language","Unclassified",44.7,11.1,1128,279,2522
+201415,"Academic year","National","E92000001","England","Sex","Female",43.5,12.3,121177,34153,278641
+201415,"Academic year","National","E92000001","England","Sex","Male",35,10.3,101314,29773,289575
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",35.4,10.5,157347,46886,444524
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",50.5,22.3,982,434,1945
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",9.8,2.1,14,3,143
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",5.1,0.7,31,4,609
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",43.6,13.3,7918,2420,18156
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",32.7,6.8,2120,441,6476
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",47,12.3,861,226,1831
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",53.6,22.5,2028,853,3786
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",48.8,16,3314,1084,6793
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",70.3,22.9,9147,2984,13020
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",51.6,9.3,8519,1535,16495
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",56.6,11.4,3939,793,6957
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",61,18,4226,1247,6926
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",42.8,5.7,3468,464,8109
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","African",64.8,11.8,9442,1716,14564
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",50.6,8.1,1479,238,2923
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",78.1,37.5,1797,864,2302
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",52.5,14.3,3604,981,6865
+201415,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",38.9,13,2255,753,5792
+201415,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",23.1,3.9,26816,4504,116119
+201415,"Academic year","National","E92000001","England","POLAR","Q2",32.1,6.9,36970,7993,115171
+201415,"Academic year","National","E92000001","England","POLAR","Q3",39.6,10,44687,11345,112908
+201415,"Academic year","National","E92000001","England","POLAR","Q4",46.7,13.8,53137,15658,113873
+201415,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",55.7,22.4,60359,24293,108269
+201415,"Academic year","National","E92000001","England","POLAR","Unknown",27.8,7.1,522,133,1876
+201415,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",11,1,430,50,3790
+201415,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",39,11,222070,63880,564420
+201415,"Academic year","National","E92000001","England","SEN Status","Any special educational need",16.4,2.4,22368,3272,136805
+201415,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",46.4,14.1,200123,60654,431411
+201415,"Academic year","National","E92000001","England","Ethnicity Major","White",35.7,10.7,166292,49747,465377
+201415,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",44.1,13.8,8323,2604,18886
+201415,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",60.5,16.2,27628,7423,45700
+201415,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",56.2,9.4,14389,2418,25596
+201415,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",52.5,14.3,3604,981,6865
+201415,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",38.9,13,2255,753,5792
+201516,"Academic year","National","E92000001","England","FSM Status","Free School Meals",25.7,3.9,20640,3109,80436
+201516,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",43.3,12.2,208442,59017,481837
+201516,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",26.4,4.1,37031,5776,140281
+201516,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",45.5,13.4,192051,56350,421992
+201516,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",19.5,2.8,20422,2956,104501
+201516,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",8,1.2,1708,250,21311
+201516,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",47.4,13.5,206952,58920,436461
+201516,"Academic year","National","E92000001","England","First Language","English",38.4,10.7,188458,52667,490727
+201516,"Academic year","National","E92000001","England","First Language","Other than English",57.1,13.3,40015,9310,70119
+201516,"Academic year","National","E92000001","England","First Language","Unclassified",42.7,10.4,609,149,1427
+201516,"Academic year","National","E92000001","England","Sex","Female",45.2,12.1,124471,33340,275088
+201516,"Academic year","National","E92000001","England","Sex","Male",36.4,10,104611,28786,287185
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",36.7,10.3,159554,44703,434574
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",49.4,18.7,964,365,1951
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",6.7,0.7,9,1,135
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",4.7,0.4,35,3,742
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",44.4,13.1,8331,2461,18776
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",34.6,6.4,2423,450,6997
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",50.6,13.1,1039,269,2052
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",54.7,20.6,2283,858,4175
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",49.9,14.9,3483,1042,6981
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",71.1,22.9,9380,3014,13186
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",54.1,9.5,9215,1623,17034
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",61.2,12.3,4436,890,7248
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",62.8,16.9,4626,1243,7372
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",43.9,5.9,3441,460,7845
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","African",66.7,12.3,10387,1911,15569
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",50.3,7,1406,197,2796
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",78,37.4,1808,868,2319
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",55.9,14.8,3943,1040,7050
+201516,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",42.4,13.3,2319,728,5471
+201516,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",24.9,3.9,28596,4519,114693
+201516,"Academic year","National","E92000001","England","POLAR","Q2",34,6.8,38538,7745,113289
+201516,"Academic year","National","E92000001","England","POLAR","Q3",40.9,9.9,45636,11004,111510
+201516,"Academic year","National","E92000001","England","POLAR","Q4",48.3,13.5,54670,15303,113204
+201516,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",56.7,21.7,61128,23449,107900
+201516,"Academic year","National","E92000001","England","POLAR","Unknown",30.6,6.3,514,106,1677
+201516,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",12,1,440,40,3600
+201516,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",41,11,228650,62090,558670
+201516,"Academic year","National","E92000001","England","Children in Need","Children in Need",10,1,1450,170,14630
+201516,"Academic year","National","E92000001","England","Children in Need","All Other Pupils",42,11,227630,61950,547640
+201516,"Academic year","National","E92000001","England","SEN Status","Any special educational need",17.6,2.5,22130,3206,125812
+201516,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",47.4,13.5,206952,58920,436461
+201516,"Academic year","National","E92000001","England","Ethnicity Major","White",37,10.4,168893,47533,456178
+201516,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",45.7,13,9228,2619,20205
+201516,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",62.5,16.2,29465,7638,47159
+201516,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",58.1,9.8,15234,2568,26210
+201516,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",55.9,14.8,3943,1040,7050
+201516,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",42.4,13.3,2319,728,5471
+201617,"Academic year","National","E92000001","England","FSM Status","Free School Meals",26.2,4.2,22392,3550,85527
+201617,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",43.9,12.7,213841,61754,487415
+201617,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",27.4,4.5,41751,6830,152514
+201617,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",46.3,13.9,194482,58474,420428
+201617,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",19.7,3,19185,2933,97363
+201617,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",8.6,1.3,1908,289,22313
+201617,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",47.5,13.7,215140,62082,453266
+201617,"Academic year","National","E92000001","England","First Language","English",38.8,11.1,193332,55232,498866
+201617,"Academic year","National","E92000001","England","First Language","Other than English",58.2,13.7,42419,9965,72906
+201617,"Academic year","National","E92000001","England","First Language","Unclassified",41.2,9.1,482,107,1170
+201617,"Academic year","National","E92000001","England","Sex","Female",46.2,12.8,129964,35883,281063
+201617,"Academic year","National","E92000001","England","Sex","Male",36.4,10.1,106269,29421,291879
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",36.9,10.6,161828,46398,439114
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",50.8,21.6,963,409,1894
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",4.8,0,7,0,145
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",5.4,1,45,8,835
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",45.4,13.6,8949,2692,19724
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",35.6,7.1,2608,519,7329
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",49.3,12.8,1155,300,2341
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",54.1,19.9,2417,888,4464
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",49.8,16,3760,1207,7557
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",72.6,23,9823,3111,13537
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",55.2,9.5,9841,1700,17814
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",62.5,14.2,4810,1095,7700
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",65.2,17.7,5125,1393,7856
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",45.8,5.7,3747,468,8180
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","African",68.3,12.2,11108,1982,16273
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",52.7,8.5,1630,262,3093
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",79,38.4,1818,883,2300
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",57.8,15.7,4225,1150,7310
+201617,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",43.4,15.3,2374,839,5476
+201617,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",25.5,4.2,29806,4897,116815
+201617,"Academic year","National","E92000001","England","POLAR","Q2",34.5,7,39926,8055,115752
+201617,"Academic year","National","E92000001","England","POLAR","Q3",41.7,10.2,47644,11647,114126
+201617,"Academic year","National","E92000001","England","POLAR","Q4",48.5,14,55590,16091,114675
+201617,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",57.1,22.3,62762,24499,109964
+201617,"Academic year","National","E92000001","England","POLAR","Unknown",31.4,7.1,505,115,1610
+201617,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",13,2,460,60,3640
+201617,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",41,11,235780,65250,569310
+201617,"Academic year","National","E92000001","England","Children in Need","Children in Need",11,1,1650,230,15460
+201617,"Academic year","National","E92000001","England","Children in Need","All Other Pupils",42,12,234580,65080,557490
+201617,"Academic year","National","E92000001","England","SEN Status","Any special educational need",17.6,2.7,21093,3222,119676
+201617,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",47.5,13.7,215140,62082,453266
+201617,"Academic year","National","E92000001","England","Ethnicity Major","White",37.2,10.7,171792,49507,461712
+201617,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",45.8,13.4,9940,2914,21691
+201617,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",63.8,16.6,31417,8182,49207
+201617,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",59.8,9.8,16485,2712,27546
+201617,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",57.8,15.7,4225,1150,7310
+201617,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",43.4,15.3,2374,839,5476
+201718,"Academic year","National","E92000001","England","FSM Status","Free School Meals",26.3,4.4,21276,3529,81033
+201718,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",44.9,13.2,214878,63392,478927
+201718,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",27.7,4.8,41269,7086,148721
+201718,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",47.4,14.5,194885,59835,411239
+201718,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",20.8,3.5,18346,3098,88104
+201718,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",8.5,1.3,1841,292,21674
+201718,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",48,14.1,215967,63531,450182
+201718,"Academic year","National","E92000001","England","First Language","English",39.7,11.6,192122,56256,483476
+201718,"Academic year","National","E92000001","England","First Language","Other than English",57.8,14,43593,10558,75443
+201718,"Academic year","National","E92000001","England","First Language","Unclassified",42.2,10.3,439,107,1041
+201718,"Academic year","National","E92000001","England","Sex","Female",47.4,13.5,129998,37038,274408
+201718,"Academic year","National","E92000001","England","Sex","Male",37.2,10.5,106156,29883,285552
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",37.8,11.1,159964,46968,423214
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",51.8,23,982,436,1894
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",5.2,0.7,7,1,134
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",4.6,0.5,46,5,998
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",45.9,14.2,9780,3020,21322
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",35.5,7.4,2629,551,7415
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",50.8,13.4,1203,318,2367
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",55.8,21.2,2574,976,4609
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",50.9,17.5,3887,1338,7631
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",72.2,22.2,9667,2976,13398
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",56.1,9.9,10439,1852,18619
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",63.4,15.5,5162,1261,8139
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",66.1,19.1,5270,1524,7973
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",46.4,6.4,3543,490,7633
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","African",67.4,13,10982,2121,16283
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",53.4,8.8,1672,276,3130
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",77.6,39.5,1668,850,2150
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",58,15.7,4371,1183,7534
+201718,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",41.8,14,2308,775,5517
+201718,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",26.4,4.6,29570,5123,111905
+201718,"Academic year","National","E92000001","England","POLAR","Q2",35.3,7.5,39689,8466,112510
+201718,"Academic year","National","E92000001","England","POLAR","Q3",42.5,10.5,47552,11781,111763
+201718,"Academic year","National","E92000001","England","POLAR","Q4",49.1,14.4,55613,16259,113161
+201718,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",57.9,23,63246,25153,109212
+201718,"Academic year","National","E92000001","England","POLAR","Unknown",34.4,9.9,484,139,1409
+201718,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",12,2,420,60,3610
+201718,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",42,12,235730,66860,556350
+201718,"Academic year","National","E92000001","England","Children in Need","Children in Need",12,2,1840,290,15950
+201718,"Academic year","National","E92000001","England","Children in Need","All Other Pupils",43,12,234320,66630,544010
+201718,"Academic year","National","E92000001","England","SEN Status","Any special educational need",18.4,3.1,20187,3390,109778
+201718,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",48,14.1,215967,63531,450182
+201718,"Academic year","National","E92000001","England","Ethnicity Major","White",38.2,11.3,170779,50430,447562
+201718,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",46.7,14.5,10293,3183,22022
+201718,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",64.1,16.8,32206,8463,50279
+201718,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",59.9,10.7,16197,2887,27046
+201718,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",58,15.7,4371,1183,7534
+201718,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",41.8,14,2308,775,5517
+201819,"Academic year","National","E92000001","England","FSM Status","Free School Meals",26.3,4.4,20247,3360,76850
+201819,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",45.1,13,215624,62013,477908
+201819,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",28.4,4.8,42075,7083,148325
+201819,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",47.7,14.3,193796,58290,406433
+201819,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",20.6,3.6,14186,2488,68880
+201819,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",8.9,1.3,1912,285,21545
+201819,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",47.3,13.5,219773,62600,464333
+201819,"Academic year","National","E92000001","England","First Language","English",40,11.4,189874,54310,475234
+201819,"Academic year","National","E92000001","England","First Language","Other than English",58,13.9,45585,10950,78610
+201819,"Academic year","National","E92000001","England","First Language","Unclassified",45.1,12.4,412,113,914
+201819,"Academic year","National","E92000001","England","Sex","Female",48,13.2,130253,35741,271577
+201819,"Academic year","National","E92000001","England","Sex","Male",37.3,10.5,105618,29632,283181
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",37.9,10.8,156809,44779,413773
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",53,21.8,1005,413,1896
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",7.6,0.7,11,1,145
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",5.2,0.5,57,6,1091
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",46.6,14,10679,3195,22897
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",35.8,7.7,2616,560,7309
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",51.5,12.9,1305,328,2536
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",55.2,20.4,2690,992,4874
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",52.3,16.8,4110,1321,7858
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",71.7,22.9,9578,3052,13356
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",56.5,10.3,11287,2056,19983
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",64.9,15.6,5194,1247,8005
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",68.8,21,5649,1728,8214
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",44.7,5.6,3274,409,7328
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","African",66.9,12.8,11157,2136,16685
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",52.1,8.8,1697,287,3257
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",79.3,40.5,1637,836,2065
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",59.9,16,4674,1248,7809
+201819,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",43,13.7,2442,779,5677
+201819,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",27.3,4.6,30185,5091,110407
+201819,"Academic year","National","E92000001","England","POLAR","Q2",35.8,7.5,39710,8322,110852
+201819,"Academic year","National","E92000001","England","POLAR","Q3",42.5,10.3,46991,11355,110621
+201819,"Academic year","National","E92000001","England","POLAR","Q4",49.3,14.1,55649,15958,112797
+201819,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",57.8,22.6,62838,24514,108651
+201819,"Academic year","National","E92000001","England","POLAR","Unknown",34.8,9.3,498,133,1430
+201819,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",13,2,470,60,3720
+201819,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",43,12,235400,65320,551040
+201819,"Academic year","National","E92000001","England","Children in Need","Children in Need",11,2,1830,280,16340
+201819,"Academic year","National","E92000001","England","Children in Need","All Other Pupils",43,12,234040,65090,538420
+201819,"Academic year","National","E92000001","England","SEN Status","Any special educational need",17.8,3.1,16098,2773,90425
+201819,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",47.3,13.5,219773,62600,464333
+201819,"Academic year","National","E92000001","England","Ethnicity Major","White",38.3,11,168561,48394,439802
+201819,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",47.5,14.2,10721,3201,22577
+201819,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",64.6,17.3,33345,8919,51623
+201819,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",59.1,10.4,16128,2832,27270
+201819,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",59.9,16,4674,1248,7809
+201819,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",43,13.7,2442,779,5677
+201920,"Academic year","National","E92000001","England","FSM Status","Free School Meals",26.6,4.6,19291,3326,72572
+201920,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",45.7,13.6,214119,63523,468450
+201920,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",28.8,5.1,41831,7412,145472
+201920,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",48.4,15,191579,59437,395550
+201920,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",20.8,3.9,12071,2256,58165
+201920,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",8.4,1.3,1754,275,20838
+201920,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",47.5,13.9,219585,64318,462019
+201920,"Academic year","National","E92000001","England","First Language","English",40.5,12.1,185510,55229,458289
+201920,"Academic year","National","E92000001","England","First Language","Other than English",58,14.1,47431,11507,81742
+201920,"Academic year","National","E92000001","England","First Language","Unclassified",47.3,11.4,469,113,991
+201920,"Academic year","National","E92000001","England","Sex","Female",48.9,14,129832,37199,265283
+201920,"Academic year","National","E92000001","England","Sex","Male",37.6,10.8,103578,29650,275739
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",38.2,11.4,151369,45298,395911
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",54.1,23.4,968,418,1790
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",10.7,3.3,13,4,122
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",6.9,0.4,79,5,1141
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",47.5,14.2,11787,3530,24833
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",35.6,8,2551,573,7169
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",51.4,12,1379,322,2685
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",56.7,21.2,2896,1082,5105
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",51.4,17,4067,1348,7917
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",71.7,23.5,10082,3299,14056
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",57.1,10,11660,2050,20431
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",64.5,16,5365,1331,8324
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",69.4,20.7,5846,1744,8421
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",43.6,6.2,3149,449,7222
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","African",67.7,13.2,11756,2291,17364
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",54.4,9.4,1827,317,3359
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",80.9,40.2,1643,816,2032
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",58.7,15.4,4816,1267,8209
+201920,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",43.7,14.3,2157,705,4931
+201920,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",27.9,5,29803,5363,106722
+201920,"Academic year","National","E92000001","England","POLAR","Q2",36.4,7.9,39186,8554,107668
+201920,"Academic year","National","E92000001","England","POLAR","Q3",43,10.7,46371,11490,107781
+201920,"Academic year","National","E92000001","England","POLAR","Q4",49.9,14.9,55144,16496,110456
+201920,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",58.3,23.2,62396,24828,106963
+201920,"Academic year","National","E92000001","England","POLAR","Unknown",35.6,8.2,510,118,1432
+201920,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",13,2,460,60,3640
+201920,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",43,12,232950,66790,537380
+201920,"Academic year","National","E92000001","England","Children in Need","Children in Need",12,2,1910,320,16270
+201920,"Academic year","National","E92000001","England","Children in Need","All Other Pupils",44,13,231500,66530,524760
+201920,"Academic year","National","E92000001","England","SEN Status","Any special educational need",17.5,3.2,13825,2531,79003
+201920,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",47.5,13.9,219585,64318,462019
+201920,"Academic year","National","E92000001","England","Ethnicity Major","White",38.7,11.6,164216,49255,423797
+201920,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",47.6,14.5,10893,3325,22876
+201920,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",65,17.3,34596,9240,53264
+201920,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",59.9,10.9,16732,3057,27945
+201920,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",58.7,15.4,4816,1267,8209
+201920,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",43.7,14.3,2157,705,4931
+202021,"Academic year","National","E92000001","England","FSM Status","Free School Meals",28.1,4.6,19719,3234,70052
+202021,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",46.8,13.2,215383,60823,459750
+202021,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",30.7,5.1,42904,7180,139635
+202021,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",49.3,14.6,192198,56877,390167
+202021,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",22.5,3.7,12400,2054,55091
+202021,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",8.7,1.2,1756,237,20241
+202021,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",48.6,13.6,220946,61766,454470
+202021,"Academic year","National","E92000001","England","First Language","English",41.6,11.7,184801,51840,444657
+202021,"Academic year","National","E92000001","England","First Language","Other than English",59.2,14.4,49963,12139,84428
+202021,"Academic year","National","E92000001","England","First Language","Unclassified",47.1,10.9,338,78,717
+202021,"Academic year","National","E92000001","England","Sex","Female",50.6,13.5,131758,35250,260374
+202021,"Academic year","National","E92000001","England","Sex","Male",38.4,10.7,103344,28807,269428
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",39.1,10.9,148455,41552,379953
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",54.7,21.6,924,365,1688
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",9.3,0.8,12,1,129
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",6.8,1.3,79,15,1156
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",49,14.1,12642,3646,25787
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",35.3,7.3,2504,521,7097
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",51.7,13.4,1412,367,2732
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",55.5,21.1,2880,1094,5193
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",53,16.1,4597,1392,8667
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",72.6,24,10181,3362,14018
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",58.4,10.4,12505,2223,21397
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",68.5,16.2,6104,1439,8905
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",69.7,21.8,6013,1882,8621
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",45.8,5.8,3280,412,7164
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","African",69.8,13.9,12248,2445,17535
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",56,9.6,1870,321,3338
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",81,42.1,1638,850,2021
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",60,15.8,5111,1343,8515
+202021,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",45,14.1,2647,827,5886
+202021,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",29.5,5,30711,5230,104008
+202021,"Academic year","National","E92000001","England","POLAR","Q2",37.2,7.6,38955,7973,104611
+202021,"Academic year","National","E92000001","England","POLAR","Q3",44.4,10.5,47029,11106,105819
+202021,"Academic year","National","E92000001","England","POLAR","Q4",51.1,14.4,55399,15558,108366
+202021,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",59.2,22.8,62458,24055,105589
+202021,"Academic year","National","E92000001","England","POLAR","Unknown",39,9.6,550,135,1409
+202021,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",13,2,510,80,3820
+202021,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",45,12,234590,63980,525990
+202021,"Academic year","National","E92000001","England","Children in Need","Children in Need",13,2,2000,320,15740
+202021,"Academic year","National","E92000001","England","Children in Need","All Other Pupils",45,12,233100,63740,514060
+202021,"Academic year","National","E92000001","England","SEN Status","Any special educational need",18.8,3,14156,2291,75332
+202021,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",48.6,13.6,220946,61766,454470
+202021,"Academic year","National","E92000001","England","Ethnicity Major","White",39.7,11.2,162112,45579,408713
+202021,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",48.1,14.2,11393,3374,23689
+202021,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",66.3,17.8,36441,9756,54962
+202021,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",62.1,11.3,17398,3178,28037
+202021,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",60,15.8,5111,1343,8515
+202021,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",45,14.1,2647,827,5886
+202122,"Academic year","National","E92000001","England","FSM Status","Free School Meals",29.2,5.2,19443,3441,66690
+202122,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",49.4,14.2,225701,64873,457300
+202122,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",32.5,5.9,43755,7997,134811
+202122,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",51.7,15.5,201389,60317,389179
+202122,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",24.2,4.2,13099,2248,54058
+202122,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",8.9,1.4,1768,276,19918
+202122,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",51.2,14.6,230277,65790,450014
+202122,"Academic year","National","E92000001","England","First Language","English",43.9,12.5,192008,54636,436944
+202122,"Academic year","National","E92000001","England","First Language","Other than English",61.1,15.7,52706,13567,86212
+202122,"Academic year","National","E92000001","England","First Language","Unclassified",51.6,13.3,430,111,834
+202122,"Academic year","National","E92000001","England","Sex","Female",53.6,14.7,137768,37880,256901
+202122,"Academic year","National","E92000001","England","Sex","Male",40.2,11.4,107376,30434,267089
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",41.2,11.6,151856,42736,368671
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",57.9,23.7,961,394,1660
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",9,0,10,0,111
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",12.6,0.4,145,5,1148
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",51.4,15,13543,3944,26352
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",38,7.8,2703,553,7108
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",54.8,13.2,1613,388,2941
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",58.7,23,3256,1275,5551
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",56.6,17,5156,1545,9110
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",74.8,26.7,10915,3902,14594
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",60.8,11.9,13899,2723,22864
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",68.9,19.1,6468,1794,9382
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",72.9,23.5,6534,2108,8957
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",45.8,6.4,3190,447,6964
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","African",71.2,16,13075,2938,18368
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",58.6,11.1,2138,405,3651
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",83.8,45.6,1552,844,1851
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",61.7,17.1,5320,1474,8619
+202122,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",46.2,13.8,2810,839,6088
+202122,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",31.7,5.7,32420,5873,102400
+202122,"Academic year","National","E92000001","England","POLAR","Q2",39.7,8.5,40981,8823,103249
+202122,"Academic year","National","E92000001","England","POLAR","Q3",46.6,11.3,48671,11764,104542
+202122,"Academic year","National","E92000001","England","POLAR","Q4",53.7,15.6,57721,16758,107541
+202122,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",61.8,23.8,64761,24946,104803
+202122,"Academic year","National","E92000001","England","POLAR","Unknown",40.5,10.3,590,150,1455
+202122,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",14,2,550,80,3880
+202122,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",47,13,244590,68230,520110
+202122,"Academic year","National","E92000001","England","Children in Need","Children in Need",14,2,2110,320,15600
+202122,"Academic year","National","E92000001","England","Children in Need","All Other Pupils",48,13,243030,67990,508390
+202122,"Academic year","National","E92000001","England","SEN Status","Any special educational need",20.1,3.4,14867,2524,73976
+202122,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",51.2,14.6,230277,65790,450014
+202122,"Academic year","National","E92000001","England","Ethnicity Major","White",41.8,11.8,166515,47079,397942
+202122,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",51.5,15.2,12728,3761,24710
+202122,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",68.3,19.7,39368,11371,57648
+202122,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",63.5,13.1,18403,3790,28983
+202122,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",61.7,17.1,5320,1474,8619
+202122,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",46.2,13.8,2810,839,6088
+202223,"Academic year","National","E92000001","England","FSM Status","Free School Meals",29,6.1,22197,4707,76561
+202223,"Academic year","National","E92000001","England","FSM Status","All Other Pupils",49.8,16.8,232346,78353,466509
+202223,"Academic year","National","E92000001","England","Disadvantage","Disadvantaged",31.9,6.9,42863,9302,134519
+202223,"Academic year","National","E92000001","England","Disadvantage","All Other Pupils",51.8,18.1,211680,73758,408551
+202223,"Academic year","National","E92000001","England","SEN Provision","SEN support / SEN without an EHC plan",24.9,5.2,14179,2978,56849
+202223,"Academic year","National","E92000001","England","SEN Provision","Education, health and care plan",9.3,1.6,1938,342,20848
+202223,"Academic year","National","E92000001","England","SEN Provision","No SEN provision",51.2,17.1,238426,79740,465373
+202223,"Academic year","National","E92000001","England","First Language","English",44,14.6,198629,65926,451334
+202223,"Academic year","National","E92000001","England","First Language","Other than English",61.1,18.7,55213,16903,90413
+202223,"Academic year","National","E92000001","England","First Language","Unclassified",53,17.5,701,231,1323
+202223,"Academic year","National","E92000001","England","Sex","Female",53.6,17.6,142673,46857,266093
+202223,"Academic year","National","E92000001","England","Sex","Male",40.4,13.1,111870,36203,276977
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","English / Welsh / Scottish / Northern Irish / British",41.2,13.4,154843,50557,376276
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Irish",56.3,24.1,953,407,1692
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Traveller of Irish Heritage",11.5,5.1,18,8,156
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Gypsy / Roma",16.8,0.5,217,6,1294
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other White Background",51.1,17,14579,4845,28510
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black Caribbean",37.3,9.4,2808,704,7527
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","White and Black African",55.2,16.8,1805,549,3268
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","White and Asian",59.6,25.8,3677,1595,6172
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Mixed / Multiple ethnic background",56.7,20.3,5754,2057,10150
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Indian",74.9,33.2,11584,5144,15472
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Pakistani",60.1,15.2,14145,3579,23535
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Bangladeshi",69.6,22.5,6883,2226,9884
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Asian Background",74.3,27.9,6931,2604,9333
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Caribbean",43.8,8.3,3276,624,7484
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","African",70.4,18.5,13930,3670,19797
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Any other Black / African / Caribbean background",57.7,13.2,2247,514,3892
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Chinese",84,49.2,1669,978,1988
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Any Other Ethnic Group",61.6,19.4,5949,1874,9655
+202223,"Academic year","National","E92000001","England","Ethnicity Minor","Unknown",46.9,16,3275,1119,6985
+202223,"Academic year","National","E92000001","England","POLAR","Q1 - Most Disadvantaged",31.7,7.1,33553,7560,105905
+202223,"Academic year","National","E92000001","England","POLAR","Q2",39.8,10.5,42739,11246,107340
+202223,"Academic year","National","E92000001","England","POLAR","Q3",46.8,13.7,50404,14792,107723
+202223,"Academic year","National","E92000001","England","POLAR","Q4",53.3,17.9,59046,19862,110824
+202223,"Academic year","National","E92000001","England","POLAR","Q5 - Most Advantaged",62.1,26.8,68068,29379,109601
+202223,"Academic year","National","E92000001","England","POLAR","Unknown",43.7,13.2,733,221,1677
+202223,"Academic year","National","E92000001","England","Looked After Status","Looked after continuously for 12 months or more",15,2,610,100,4020
+202223,"Academic year","National","E92000001","England","Looked After Status","All Other Pupils",47,15,253940,82960,539050
+202223,"Academic year","National","E92000001","England","Children in Need","Children in Need",14,2,2230,390,16160
+202223,"Academic year","National","E92000001","England","Children in Need","All Other Pupils",48,16,252310,82670,526910
+202223,"Academic year","National","E92000001","England","SEN Status","Any special educational need",20.7,4.3,16117,3320,77697
+202223,"Academic year","National","E92000001","England","SEN Status","No Identified special educational need",51.2,17.1,238426,79740,465373
+202223,"Academic year","National","E92000001","England","Ethnicity Major","White",41.8,13.7,170610,55823,407928
+202223,"Academic year","National","E92000001","England","Ethnicity Major","Mixed / Multiple ethnic groups",51.8,18.1,14044,4905,27117
+202223,"Academic year","National","E92000001","England","Ethnicity Major","Asian / Asian British",68.4,24.1,41212,14531,60212
+202223,"Academic year","National","E92000001","England","Ethnicity Major","Black / African / Caribbean / Black British",62.4,15.4,19453,4808,31173
+202223,"Academic year","National","E92000001","England","Ethnicity Major","Other Ethnic Group",61.6,19.4,5949,1874,9655
+202223,"Academic year","National","E92000001","England","Ethnicity Major","Unknown",46.9,16,3275,1119,6985
