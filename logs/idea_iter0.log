@@ -4,9 +4,9 @@ Generating idea with fast mode
 INFO: No human_feedback.md found in /Users/boris/Desktop/ucas-widening-participation/Iteration0/idea_output
 INFO: EDA_report=False, ideas will be generated without EDA report
 Sampling idea space
-done 1442 663
-Selecting the best idea (Selector 1)Selecting the best idea (Selector 2)
-Selecting the best idea (Selector 3)
+done 1755 707
+Selecting the best idea (Selector 1)Selecting the best idea (Selector 2)Selecting the best idea (Selector 3)
+
 
 Chosing the final idea
 Hater (iteration 0)
@@ -15,5 +15,5 @@ Hater (iteration 1)
 Maker (iteration 2)
 Hater (iteration 2)
 Maker (iteration 3)
-done 21859 3063
-Idea generated in 0 min 15 sec. Cost: $0.013
+done 25537 3045
+Idea generated in 0 min 15 sec. Cost: $0.014

@@ -29,15 +29,16 @@ Questions of interest:
 2. **The high-tariff gap:** repeat (1) for `high_tariff_progression_rate`. The high-tariff gap is far wider in proportional terms (e.g. ~3% vs ~20%) — quantify the ratio and absolute gap, and its trend.
 3. **Which characteristic divides most?** Compare gap magnitudes across POLAR, FSM/Disadvantage, ethnicity, sex, SEN and looked-after status. Rank the dimensions by equity gap.
 4. **Compounding disadvantage:** for groups with both overall and high-tariff rates, show how disadvantage compounds as you move from "any HE" to "selective HE".
-5. **Convergence test:** fit simple trend lines to the Q1–Q5 gap (overall and high-tariff) and test whether the gap is closing, and if so, at what rate / projected year of parity.
+5. **Trend in the gap:** fit a single simple linear trend to the Q1–Q5 gap (overall and high-tariff) over the available years and report the slope **with a confidence interval**, to say whether the gap is narrowing, static, or widening. Flag 2020/21 onward as COVID-affected (annotate, don't model as a separate regime). Do **not** fit segmented/structural-break regressions or extrapolate a "projected year of parity" — there are only ~14 annual points per series (and just 3 after 2020/21), far too few to identify a post-break slope or a credible extrapolation.
 
 ### Expected outputs
 - Time-series gap plots: Q1 vs Q5 POLAR progression (overall and high-tariff) across cycles, with the absolute gap and gap ratio annotated.
 - A ranked comparison of equity gaps across all breakdown topics for the latest year.
-- A small trend/regression analysis of the gap over time (slope, significance, projected parity).
+- A simple linear trend of the gap over time: slope **with confidence interval** and significance, with 2020/21+ annotated as COVID-affected (no structural-break model, no parity extrapolation).
 - A concise, policy-audience Results narrative grounded in the real figures.
 
 ### Notes for the analysis code
 - Parse `time_period` (`YYYYYY`) into a readable cycle label and an integer year for trend fitting.
 - Treat `Unknown` categories as a separate series; exclude from gap calculations unless explicitly analysing data quality.
-- Rates are percentages already; headcounts let you compute weighted/pooled figures and confidence intervals where useful.
+- Rates are percentages already; use the headcounts (`number_of_he_students` / `number_of_students`, and the high-tariff counts) to attach **Wilson/binomial confidence intervals** to every rate and gap — quantitative claims should carry error bars, not bare point estimates.
+- **Statistical scope (the data is granular, not large):** the 666 rows are aggregate published rates organised as topic × category × year, not independent samples. Any trend is a series of **at most 14 annual points** per (topic, category) — and only 8–10 for `Children in Need` / `Disadvantage`, with just 3 points after 2020/21. Keep methods proportionate: descriptive equity benchmarking (RRR, selectivity scores, gap rankings) and a single simple linear trend with CIs are well-supported; segmented/structural-break regressions, multivariable models, and parity extrapolations are **not** — don't attempt them.
