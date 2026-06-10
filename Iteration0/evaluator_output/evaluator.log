@@ -1,5 +1,741 @@
 
 ###### PROMPT BEGINS ########
+
+###### PROMPT BEGINS ########
+Human: You are evaluating whether the code for one step of a multi-step analysis contradicts its plan.
+
+You are given the plan for a single step and the Python source code that was actually executed for that step. Decide whether the code contradicts the plan's instructions for THIS step only.
+
+**Report ONLY contradictions.** A "contradiction" means:
+- The plan REQUIRED something specific and the code does it differently (e.g. plan asked for a 5-fold genus-blocked CV but the code does a random 10-fold split), OR
+- The plan REQUIRED something specific and the code SKIPS it entirely (e.g. plan asked for the Brant test but the code never runs one).
+
+**Do NOT report any of the following:**
+- Code that does MORE than the plan asks for (extensions are acceptable and expected).
+- Helper functions, logging, error handling, plot styling, or other auxiliary code not mentioned in the plan.
+- Implementation details (variable names, code organization, choice of library when the plan didn't specify one).
+- Restating what the code does correctly. If the code matches the plan, the verdict alone is enough.
+
+**Severity.** Tag every contradiction with one of three severity levels (in square brackets, at the very start of the bullet):
+
+- [MAJOR] — methodological choice that affects the scientific conclusion. Examples: wrong algorithm family, wrong cross-validation scheme, hard-coded parameter where the plan asked for estimation/sweep, missing a step whose absence invalidates the result.
+- [INTERMEDIATE] — a required step is skipped or done differently, but the main scientific conclusion is unlikely to change. Examples: omitted sanity check or diagnostic test, missing required diagnostic plot, simplification of a robustness analysis.
+- [MINOR] — small-scope or cosmetic deviation with no scientific impact. Examples: plot uses different colormap, intermediate file not saved, slightly different reporting format.
+
+If unsure between two levels, pick the more severe one.
+
+**Verdict** must match the most severe contradiction:
+- AGREES — no contradictions.
+- PARTIAL — only [INTERMEDIATE] or [MINOR] contradictions.
+- DISAGREES — at least one [MAJOR] contradiction.
+
+If there are no contradictions, the verdict is AGREES and the Contradictions list is "none". Brief is correct.
+
+Plan for this step (step 1 of 4):
+Step 1 of 4 [engineer]: Data Preparation, Uncertainty Estimation, and Metric Calculation
+- Load the dataset from the absolute path /Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv.
+- Parse time_period (YYYYYY) into both a clean integer year (e.g. 2019 for 201920) and a human-readable academic cycle label (e.g. "2019/20"), retaining both in all saved outputs.
+- Filter out Unknown categories before primary gap or ratio calculations and store them separately for data-quality validation.
+- Perform a data sparsity check on cohort sizes across breakdown topics (e.g., Looked After Status) and flag subgroups with small cohorts to contextualize high volatility.
+- Calculate 95% Wilson score confidence intervals for all overall progression rates and high-tariff progression rates directly from raw headcount columns using statsmodels.stats.proportion.proportion_confint with method='wilson'.
+- Calculate the "Conversion Ratio" (number_of_high_tariff_he_students / number_of_he_students) for each subgroup and propagate its uncertainty.
+- Compute overall and high-tariff absolute gaps (Q5 - Q1) and relative ratios (Q5 / Q1) for the POLAR topic, calculating propagated confidence intervals for both difference (sum of variances) and ratio metrics (Delta Method).
+- Save all processed datasets, metrics, and uncertainty bounds to structured CSV files flat under data/.
+
+Code that was executed for this step (step_1.py):
+```python
+import os
+import numpy as np
+import pandas as pd
+from statsmodels.stats.proportion import proportion_confint
+
+
+def parse_time_period(tp_val):
+    """Parses a YYYYYY time_period integer into a year and academic cycle label."""
+    tp_str = str(tp_val)
+    if len(tp_str) == 6:
+        year_int = int(tp_str[:4])
+        cycle_str = f"{tp_str[:4]}/{tp_str[4:]}"
+        return year_int, cycle_str
+    else:
+        # Fallback
+        return np.nan, "Unknown"
+
+
+def calculate_wilson_ci(count, total):
+    """Calculates Wilson score confidence intervals, handling boundary cases."""
+    if pd.isna(count) or pd.isna(total) or total <= 0 or count < 0 or count > total:
+        return np.nan, np.nan
+    low, high = proportion_confint(count, total, alpha=0.05, method='wilson')
+    return low, high
+
+
+def propagate_conversion_ratio_uncertainty(row):
+    """
+    Propagates uncertainty for the Conversion Ratio:
+    Conversion Ratio = number_of_high_tariff_he_students / number_of_he_students.
+    Since high-tariff students are a subset of all HE students, this is also a proportion.
+    We can model this directly as a binomial proportion with n = number_of_he_students
+    and x = number_of_high_tariff_he_students, applying the Wilson interval.
+    """
+    n = row['number_of_he_students']
+    x = row['number_of_high_tariff_he_students']
+    if pd.isna(n) or pd.isna(x) or n <= 0 or x < 0 or x > n:
+        return np.nan, np.nan, np.nan
+    ratio = x / n
+    low, high = proportion_confint(x, n, alpha=0.05, method='wilson')
+    return ratio, low, high
+
+
+def calculate_gap_metrics(group_1_row, group_2_row, prefix=""):
+    """
+    Calculates absolute and relative gaps between two groups with propagated CIs.
+    Group 1 is usually the advantaged group (e.g. Q5), Group 2 the disadvantaged (e.g. Q1).
+    
+    Absolute Gap = p1 - p2
+    Relative Ratio = p1 / p2
+    """
+    p1 = group_1_row[f'{prefix}progression_rate'] / 100.0
+    p2 = group_2_row[f'{prefix}progression_rate'] / 100.0
+    
+    n1 = group_1_row['number_of_students']
+    n2 = group_2_row['number_of_students']
+    
+    if pd.isna(p1) or pd.isna(p2) or pd.isna(n1) or pd.isna(n2) or n1 <= 0 or n2 <= 0:
+        return {}
+        
+    # Standard errors of individual proportions (using standard binomial approximation for delta method)
+    var1 = (p1 * (1 - p1)) / n1
+    var2 = (p2 * (1 - p2)) / n2
+    
+    # Absolute Gap
+    abs_gap = p1 - p2
+    abs_se = np.sqrt(var1 + var2)
+    abs_low = abs_gap - 1.96 * abs_se
+    abs_high = abs_gap + 1.96 * abs_se
+    
+    # Relative Ratio (Delta Method on Log Scale)
+    if p2 > 0 and p1 > 0:
+        rel_ratio = p1 / p2
+        # Var(log(R)) = Var(p1)/p1^2 + Var(p2)/p2^2
+        log_var = (var1 / (p1**2)) + (var2 / (p2**2))
+        log_se = np.sqrt(log_var)
+        log_low = np.log(rel_ratio) - 1.96 * log_se
+        log_high = np.log(rel_ratio) + 1.96 * log_se
+        rel_low = np.exp(log_low)
+        rel_high = np.exp(log_high)
+    else:
+        rel_ratio, rel_low, rel_high = np.nan, np.nan, np.nan
+        
+    return {
+        f'{prefix}abs_gap': abs_gap * 100.0,  # convert back to percentage points
+        f'{prefix}abs_low': abs_low * 100.0,
+        f'{prefix}abs_high': abs_high * 100.0,
+        f'{prefix}rel_ratio': rel_ratio,
+        f'{prefix}rel_low': rel_low,
+        f'{prefix}rel_high': rel_high
+    }
+
+
+if __name__ == "__main__":
+    # Disable truncation for pretty pandas outputs
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.width", 200)
+
+    # 1. Load the dataset
+    input_path = "/Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv"
+    print(f"Loading dataset from: {input_path}")
+    df = pd.read_csv(input_path)
+    
+    # 2. Temporal parsing
+    parsed_temporal = df['time_period'].apply(parse_time_period)
+    df['year'] = [x[0] for x in parsed_temporal]
+    df['academic_cycle'] = [x[1] for x in parsed_temporal]
+    
+    # 3. Separate Unknown categories for validation
+    df_unknown = df[df['breakdown'].str.lower().str.contains('unknown', na=False)].copy()
+    df_clean = df[~df['breakdown'].str.lower().str.contains('unknown', na=False)].copy()
+    
+    print(f"\nTotal rows loaded: {len(df)}")
+    print(f"Clean rows: {len(df_clean)} | Unknown/Excluded rows: {len(df_unknown)}")
+    
+    # 4. Data sparsity check
+    print("\n--- COHORT SPARSITY CHECK (by breakdown_topic) ---")
+    sparsity_summary = df_clean.groupby('breakdown_topic').agg(
+        min_cohort_size=('number_of_students', 'min'),
+        median_cohort_size=('number_of_students', 'median'),
+        max_cohort_size=('number_of_students', 'max'),
+        total_records=('number_of_students', 'count')
+    ).sort_values(by='min_cohort_size')
+    print(sparsity_summary.to_string())
+    
+    # Flag small cohorts (e.g., median cohort size < 5000)
+    flagged_topics = sparsity_summary[sparsity_summary['median_cohort_size'] < 5000].index.tolist()
+    print(f"\nFlagged high-volatility topics (median cohort < 5000): {flagged_topics}")
+
+    # 5. Statistical Uncertainty Estimation (Wilson CIs)
+    print("\nCalculating Wilson Score CIs for progression rates...")
+    
+    # Overall progression CIs
+    overall_ci = df_clean.apply(
+        lambda r: calculate_wilson_ci(r['number_of_he_students'], r['number_of_students']), axis=1
+    )
+    df_clean['progression_rate_low'] = [x[0]*100 for x in overall_ci]
+    df_clean['progression_rate_high'] = [x[1]*100 for x in overall_ci]
+    
+    # High-tariff progression CIs
+    ht_ci = df_clean.apply(
+        lambda r: calculate_wilson_ci(r['number_of_high_tariff_he_students'], r['number_of_students']), axis=1
+    )
+    df_clean['high_tariff_progression_rate_low'] = [x[0]*100 for x in ht_ci]
+    df_clean['high_tariff_progression_rate_high'] = [x[1]*100 for x in ht_ci]
+
+    # 6. Conversion Ratio and uncertainty propagation
+    print("Calculating Conversion Ratio and propagated uncertainty bounds...")
+    conversion_stats = df_clean.apply(propagate_conversion_ratio_uncertainty, axis=1)
+    df_clean['conversion_ratio'] = [x[0] for x in conversion_stats]
+    df_clean['conversion_ratio_low'] = [x[1] for x in conversion_stats]
+    df_clean['conversion_ratio_high'] = [x[2] for x in conversion_stats]
+
+    # Save clean processed dataset
+    processed_clean_path = "data/wp_processed_clean.csv"
+    df_clean.to_csv(processed_clean_path, index=False)
+    print(f"\nSaved processed clean dataset: {processed_clean_path}")
+    print("Schema:", list(df_clean.columns))
+
+    # Save unknown validation set
+    unknowns_path = "data/wp_unknown_validation.csv"
+    df_unknown.to_csv(unknowns_path, index=False)
+    print(f"Saved unknown categories validation set: {unknowns_path}")
+    
+    # 7. Compute POLAR Topic Gaps over time
+    polar_df = df_clean[df_clean['breakdown_topic'] == 'POLAR'].copy()
+    
+    polar_gaps = []
+    years = sorted(polar_df['year'].unique())
+    
+    for yr in years:
+        yr_data = polar_df[polar_df['year'] == yr]
+        q1_row = yr_data[yr_data['breakdown'] == 'Q1 - Most Disadvantaged']
+        q5_row = yr_data[yr_data['breakdown'] == 'Q5 - Most Advantaged']
+        
+        if q1_row.empty or q5_row.empty:
+            continue
+            
+        q1_row = q1_row.iloc[0]
+        q5_row = q5_row.iloc[0]
+        
+        cycle_lbl = q1_row['academic_cycle']
+        
+        # Calculate overall progression gap metrics
+        overall_gaps = calculate_gap_metrics(q5_row, q1_row, prefix="")
+        # Calculate high-tariff progression gap metrics
+        ht_gaps = calculate_gap_metrics(q5_row, q1_row, prefix="high_tariff_")
+        
+        gap_record = {
+            'year': yr,
+            'academic_cycle': cycle_lbl,
+            'q1_overall_rate': q1_row['progression_rate'],
+            'q5_overall_rate': q5_row['progression_rate'],
+            'q1_ht_rate': q1_row['high_tariff_progression_rate'],
+            'q5_ht_rate': q5_row['high_tariff_progression_rate']
+        }
+        gap_record.update(overall_gaps)
+        gap_record.update(ht_gaps)
+        polar_gaps.append(gap_record)
+        
+    polar_gaps_df = pd.DataFrame(polar_gaps)
+    
+    # Save the gap tracking metrics
+    gap_metrics_path = "data/polar_gap_trends.csv"
+    polar_gaps_df.to_csv(gap_metrics_path, index=False)
+    print(f"\nSaved POLAR gap trend metrics: {gap_metrics_path}")
+    print("Schema:", list(polar_gaps_df.columns))
+    
+    print("\n--- SUMMARY OF POLAR PROGRESSION GAPS (Q5 - Q1) OVER TIME ---")
+    summary_cols = [
+        'academic_cycle', 'abs_gap', 'abs_low', 'abs_high', 'rel_ratio', 
+        'high_tariff_abs_gap', 'high_tariff_abs_low', 'high_tariff_abs_high', 'high_tariff_rel_ratio'
+    ]
+    print(polar_gaps_df[summary_cols].to_string(index=False))
+```
+
+**Respond in exactly this format:**
+
+\\begin{STEP_REPORT}
+- Verdict: <AGREES | PARTIAL | DISAGREES>
+- Contradictions: <bulleted list with each bullet starting with [MAJOR] / [INTERMEDIATE] / [MINOR]; or "none">
+\\end{STEP_REPORT}
+Human: You are provided with the following inputs:
+
+1) A description of a dataset
+2) A current scientific idea or hypothesis
+3) A current research plan
+4) The results obtained from executing that plan
+
+**Your task is to assess whether any limitations, failures, or ambiguities in the analysis are directly attributable to constraints described in the dataset description.**
+
+Examples of such constraints include (but are not limited to):
+- required preprocessing steps or exclusions,
+- missing variables or incomplete coverage,
+- limited sample size or class imbalance,
+- measurement noise, censoring, or aggregation,
+- assumptions imposed by how the data were collected or curated.
+
+**Scope restriction (important)**:
+- Focus only on the dataset description.
+- Do not critique the scientific idea, hypothesis, or research plan.
+- Do not suggest alternative methods or models.
+- Other agents are responsible for methodological or conceptual feedback.
+
+**If a data-level constraint plausibly explains observed failures or weak results, describe:**
+- which constraint is responsible,
+- how it limits the analysis,
+- and what type of conclusions are affected.
+
+If no such constraints are evident, explicitly state that the dataset description does not appear to explain the observed issues.
+
+Data description:
+## Dataset: Widening Participation in Higher Education — "All Characteristics" (DfE, real published data)
+
+**File (absolute path — load exactly this):** `/Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv` (already present — load this; do NOT generate synthetic data). The analysis code runs from a different working directory, so always use this absolute path, never a relative one.
+
+**Provenance:** UK Department for Education, *Widening participation in higher education* official statistics (2023-24 release), obtained from Explore Education Statistics (gov.uk). Permalink:
+https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/c3f0cae9-a2f7-4363-9d48-b7a410072a6f
+Direct CSV: append `/csv` to that URL. **Licence:** Open Government Licence v3.0 (free to use/share with attribution).
+
+**Coverage:** England, national level, academic years **2009/10 → 2022/23** (14 years). The statistic measures **progression to higher education by age 19** — i.e. the percentage of a state-school cohort who enter HE — broken down by pupil characteristic. 666 data rows, tidy long format, aggregate (rates + headcounts, no personal data).
+
+### Schema (one row per year × characteristic-category)
+- `time_period` — academic year as `YYYYYY` (e.g. `201920` = 2019/20)
+- `time_identifier` — "Academic year"
+- `geographic_level`, `country_code`, `country_name` — England, national
+- `breakdown_topic` — the characteristic dimension. Values present:
+  **POLAR** (area HE-participation quintile, the core WP measure), **Disadvantage** (FSM-based disadvantage flag), **FSM Status**, **Ethnicity Major**, **Ethnicity Minor**, **Sex**, **SEN Status**, **SEN Provision**, **Looked After Status**, **Children in Need**, **First Language**
+- `breakdown` — the category within that topic, e.g. for POLAR: `Q1 - Most Disadvantaged`, `Q2`, `Q3`, `Q4`, `Q5 - Most Advantaged`, `Unknown`
+- `progression_rate` — % of the cohort progressing to **any** HE (the headline access rate)
+- `high_tariff_progression_rate` — % progressing to a **high-tariff** (selective) provider — the sharper equity measure
+- `number_of_he_students` — count progressing to HE
+- `number_of_high_tariff_he_students` — count progressing to high-tariff HE
+- `number_of_students` — cohort size (denominator)
+
+### Research aim (widening participation)
+Quantify and explain access gaps in English HE progression across disadvantage measures, and track how they have changed over 14 years — with particular attention to the gap at **high-tariff** providers.
+
+Questions of interest:
+1. **POLAR gap over time:** how large is the Q1 (most disadvantaged) vs Q5 (most advantaged) gap in overall progression, and how has it changed 2009/10→2022/23? Is it narrowing, static, or widening?
+2. **The high-tariff gap:** repeat (1) for `high_tariff_progression_rate`. The high-tariff gap is far wider in proportional terms (e.g. ~3% vs ~20%) — quantify the ratio and absolute gap, and its trend.
+3. **Which characteristic divides most?** Compare gap magnitudes across POLAR, FSM/Disadvantage, ethnicity, sex, SEN and looked-after status. Rank the dimensions by equity gap.
+4. **Compounding disadvantage:** for groups with both overall and high-tariff rates, show how disadvantage compounds as you move from "any HE" to "selective HE".
+5. **Trend in the gap:** fit a single simple linear trend to the Q1–Q5 gap (overall and high-tariff) over the available years and report the slope **with a confidence interval**, to say whether the gap is narrowing, static, or widening. Flag 2020/21 onward as COVID-affected (annotate, don't model as a separate regime). Do **not** fit segmented/structural-break regressions or extrapolate a "projected year of parity" — there are only ~14 annual points per series (and just 3 after 2020/21), far too few to identify a post-break slope or a credible extrapolation.
+
+### Expected outputs
+- Time-series gap plots: Q1 vs Q5 POLAR progression (overall and high-tariff) across cycles, with the absolute gap and gap ratio annotated.
+- A ranked comparison of equity gaps across all breakdown topics for the latest year.
+- A simple linear trend of the gap over time: slope **with confidence interval** and significance, with 2020/21+ annotated as COVID-affected (no structural-break model, no parity extrapolation).
+- A concise, policy-audience Results narrative grounded in the real figures.
+
+### Notes for the analysis code
+- Parse `time_period` (`YYYYYY`) into a readable cycle label and an integer year for trend fitting.
+- Treat `Unknown` categories as a separate series; exclude from gap calculations unless explicitly analysing data quality.
+- Rates are percentages already; use the headcounts (`number_of_he_students` / `number_of_students`, and the high-tariff counts) to attach **Wilson/binomial confidence intervals** to every rate and gap — quantitative claims should carry error bars, not bare point estimates.
+- **Statistical scope (the data is granular, not large):** the 666 rows are aggregate published rates organised as topic × category × year, not independent samples. Any trend is a series of **at most 14 annual points** per (topic, category) — and only 8–10 for `Children in Need` / `Disadvantage`, with just 3 points after 2020/21. Keep methods proportionate: descriptive equity benchmarking (RRR, selectivity scores, gap rankings) and a single simple linear trend with CIs are well-supported; segmented/structural-break regressions, multivariable models, and parity extrapolations are **not** — don't attempt them.
+
+
+Idea: 
+**Title**: Benchmarking Structural Inequality: A Comparative Analysis of Absolute Progression and Institutional Selectivity Gaps (2009/10–2022/23)
+
+**Description**: This research quantifies the 14-year evolution of equity gaps in English HE, distinguishing between overall progression rates and selective "high-tariff" access. We define the "Conversion Ratio" as the proportion of HE-enrolled students entering high-tariff providers, applying Wilson binomial confidence intervals to mitigate volatility in small-cohort subgroups like Looked After Status and SEN provision. To ensure analytical robustness, we perform a sensitivity analysis by aggregating sparse cohorts where necessary, preventing noise-driven outliers from skewing trend estimates. We calculate the absolute progression gap (Q1–Q5 POLAR) and the conversion disparity, fitting simple linear period-average slopes with 95% confidence intervals to measure the magnitude of change. The 2020/21–2022/23 period is explicitly flagged as a high-volatility window influenced by non-standard assessment practices, ensuring these years are treated as descriptive observations rather than indicators of long-term structural shifts. This dual-metric framework isolates whether demographic disparities are primarily driven by barriers to initial HE entry or by systemic exclusion from selective institutional pipelines.
+
+Research plan:
+1. **Data Preparation and Sparsity Assessment**
+   - Load the dataset from `/Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv`.
+   - Parse `time_period` into an integer year (start of academic cycle).
+   - Perform a data sparsity check: identify subgroups with consistently low cohort sizes (e.g., Looked After Status). Flag these in the analysis to ensure volatility is interpreted with caution.
+   - Filter out `Unknown` categories from primary gap calculations, retaining them only for data quality validation.
+
+2. **Statistical Uncertainty Estimation**
+   - Calculate 95% Wilson score intervals for all `progression_rate` and `high_tariff_progression_rate` values.
+   - For absolute gaps ($Rate_{A} - Rate_{B}$), calculate the variance of the difference as the sum of the individual variances ($Var(p_1) + Var(p_2)$) to derive the confidence interval.
+   - For gap ratios ($Rate_{A} / Rate_{B}$), use the Delta Method to propagate uncertainty and derive the 95% confidence interval for the ratio.
+
+3. **Defining the Dual-Metric Framework**
+   - Calculate the "Conversion Ratio" ($number\_of\_high\_tariff\_he\_students / number\_of\_he\_students$) for each subgroup.
+   - Explicitly distinguish in all reporting between the "High-Tariff Progression Rate" (access from the total cohort) and the "Conversion Ratio" (institutional selection bias given HE entry).
+   - Apply uncertainty propagation to the Conversion Ratio to ensure selectivity penalties are statistically defensible.
+
+4. **Trend Analysis of Gaps**
+   - Isolate POLAR Q1 and Q5 series for overall and high-tariff progression.
+   - Fit a simple linear regression to the absolute and relative gaps over the 14-year period.
+   - Extract the slope coefficient and 95% confidence interval.
+   - Perform a visual inspection of residuals to check for non-linear patterns or autocorrelation, noting any limitations of the linear model in the final narrative.
+
+5. **Cross-Dimensional Equity Benchmarking**
+   - For the most recent academic year, calculate the absolute and relative gaps between the most advantaged and most disadvantaged categories for every `breakdown_topic`.
+   - Rank these dimensions by the magnitude of the absolute gap to identify the primary drivers of inequality.
+
+6. **Compounding Disadvantage Analysis**
+   - Visualize the "drop-off" from overall HE progression to high-tariff progression for selected groups.
+   - Quantify the "selectivity penalty" by comparing the Conversion Ratios of disadvantaged groups against their more advantaged counterparts.
+
+7. **Visualization Strategy**
+   - Generate time-series plots for POLAR Q1 vs Q5 progression, including shaded regions for Wilson confidence intervals.
+   - Produce a ranked bar chart of equity gaps across all breakdown topics for the latest year.
+   - Annotate the 2020/21–2022/23 period as COVID-affected in all plots and include summary statistics (slope/significance) for trends.
+
+8. **Synthesis and Reporting**
+   - Compile a policy-audience narrative contrasting the "access gap" (overall) with the "selectivity gap" (high-tariff).
+   - Use the calculated slopes, confidence intervals, and gap ratios to provide a definitive statement on the trajectory of equity gaps, ensuring that small-cohort volatility and the COVID-19 period are contextualized as descriptive observations.
+
+Analysis results:
+# Results: Benchmarking Structural Inequality in English Higher Education Progression, 2009/10–2022/23
+
+## Overview
+
+This analysis used the Department for Education’s published national-level widening participation dataset for England, covering academic years 2009/10 to 2022/23, to compare inequalities in progression to higher education by age 19 across multiple pupil characteristics. The central distinction throughout is between:
+
+- **overall HE progression**: entry to any higher education; and
+- **high-tariff progression**: entry to a more selective provider from the full state-school cohort.
+
+A third metric, the **Conversion Ratio**, was derived to isolate selectivity conditional on having entered HE:
+
+\[
+\text{Conversion Ratio} = \frac{\text{number of high-tariff HE students}}{\text{number of HE students}}
+\]
+
+This separates barriers to entering HE at all from barriers to reaching selective institutions once in HE’s applicant and entrant pipeline.
+
+Unknown categories were excluded from substantive gap calculations, in line with the design brief. Uncertainty around rates was represented using **95% Wilson score intervals**; gap uncertainty for differences was propagated from component variances, and ratio uncertainty was estimated using a log-scale delta method. Trend analysis was intentionally limited to a **single simple linear regression** on annual gap series, reflecting the modest number of time points and the instruction not to fit structural-break models or project parity dates. The years **2020/21 onward** are treated as a **COVID-affected descriptive period**, not as a separately estimated regime.
+
+Across the full period, the results show a clear asymmetry. **Overall POLAR gaps narrowed modestly but significantly**, whereas **high-tariff POLAR gaps widened in absolute terms**, despite some narrowing in relative terms because disadvantaged groups started from an extremely low base. In 2022/23, the largest disparities in the system were not solely by area disadvantage: some of the starkest divides were by **detailed ethnicity**, **SEN provision**, and care-related vulnerability. The evidence therefore points to a layered pattern of inequality: access gaps into HE remain large, and selective access gaps often compound them further.
+
+---
+
+## Data quality, scope, and interpretive caution
+
+The underlying file contains **666 rows**, of which **624** remained after excluding **42 `Unknown` rows** from primary comparisons. The data are aggregated, national statistics rather than person-level observations. This has several implications.
+
+First, the estimates are precise for large groups, but volatility can still arise where subgroup numerators are small even if denominators are not. The sparsity check showed especially small minimum cohort sizes within **Ethnicity Minor** categories, and to a lesser extent in some vulnerable-status breakdowns. For example, the minimum observed subgroup denominator in Ethnicity Minor was **111**, far smaller than the large national categories used elsewhere. Consequently, the most extreme rankings for finely disaggregated ethnic groups should be interpreted as substantively important but potentially more sensitive to small-number variation than broad categories such as sex, FSM, or POLAR.
+
+Second, trend inference is necessarily limited by the annual time series length. For POLAR there are only **14 annual observations**. The fitted slopes therefore support statements about the **direction and approximate average yearly change** over the period, but not stronger causal claims about policy interventions, regime changes, or post-pandemic structural breaks.
+
+Third, the COVID-affected years should not be read as establishing a new long-run trajectory. They are best treated as recent descriptive observations in a period shaped by non-standard assessment, admissions, and progression conditions.
+
+---
+
+## POLAR inequality over time: overall progression to any HE
+
+### Levels and trajectory
+
+Figure `data/polar_trend_gaps.png` shows the long-run trajectories for POLAR quintiles Q1 and Q5. Across the full period, both groups increased their overall HE progression rates, but the increase was larger in percentage terms for the most disadvantaged group.
+
+- **Q1 overall progression** rose from **18.0%** in **2009/10** to **31.7%** in **2022/23**.
+- **Q5 overall progression** rose from **51.3%** to **62.1%** over the same period.
+
+Because Q1 improved faster than Q5 in absolute terms, the **Q5–Q1 absolute gap in overall progression** narrowed:
+
+- **2009/10**: **33.3 percentage points**
+- **2022/23**: **30.4 percentage points**
+
+The year-by-year series indicates that the overall gap was highest in the early years, peaking at **34.1 pp** in **2011/12**, then gradually declining to around **30–31 pp** in the later period. The shrinkage is real but limited in substantive magnitude: after 14 years, the gap remains about **30 percentage points**, meaning the most advantaged POLAR group still progresses to HE at nearly double the rate of the most disadvantaged group.
+
+### Relative inequality
+
+Relative inequality narrowed more sharply than the absolute gap because the disadvantaged baseline rate rose materially.
+
+- The **overall Q5:Q1 progression ratio** fell from **2.85** in **2009/10** to **1.96** in **2022/23**.
+
+Thus, by 2022/23 the most advantaged group was still progressing to HE at almost **twice** the rate of the most disadvantaged group, but this is substantially less unequal than the near-**threefold** disparity at the start of the series.
+
+### Trend model
+
+The linear trend fitted to the annual absolute POLAR gap confirms a statistically reliable narrowing:
+
+- **Slope**: **−0.328 percentage points per year**
+- **95% CI**: **[−0.412, −0.244]**
+- **p < 0.001**
+- **R² = 0.858**
+
+Because the 95% confidence interval excludes zero, the evidence supports the conclusion that the **overall POLAR gap narrowed over 2009/10–2022/23**. The fit is strong in descriptive terms. The Durbin–Watson statistic of **1.88** does not suggest severe residual autocorrelation, so the simple trend line is an adequate summary of the broad direction.
+
+The relative gap series shows an even stronger downward pattern:
+
+- **Relative-gap slope**: **−0.074 per year**
+- **95% CI**: **[−0.083, −0.066]**
+- **p < 0.001**
+- **R² = 0.969**
+
+On both absolute and relative measures, then, the overall POLAR access gap has **narrowed**, not widened. However, the pace of change is modest relative to the size of the residual inequality.
+
+---
+
+## POLAR inequality over time: high-tariff progression
+
+### Levels and trajectory
+
+The picture changes sharply when attention shifts from any HE to high-tariff providers. Figure `data/polar_trend_gaps.png` shows that high-tariff participation remains low for Q1 throughout, while Q5 retains much higher access.
+
+- **Q1 high-tariff progression** rose from **3.0%** in **2009/10** to **7.1%** in **2022/23**.
+- **Q5 high-tariff progression** rose from **20.3%** to **26.8%**.
+
+In relative terms, Q1 more than doubled from a very low base. Yet the absolute distance between groups remained extremely large and in the latest year was larger than at the start.
+
+The **Q5–Q1 high-tariff absolute gap** was:
+
+- **17.3 pp** in **2009/10**
+- **19.7 pp** in **2022/23**
+
+The series fluctuates around the high teens, with a visible increase in the most recent year. The COVID-affected period does not show a clean break in level, but it does show persistence of a large disadvantage and a marked widening in 2022/23.
+
+### Relative inequality
+
+The relative ratio tells a somewhat different story because Q1 begins from a very small denominator.
+
+- **High-tariff Q5:Q1 ratio** fell from **6.58** in **2009/10** to **3.77** in **2022/23**.
+
+Thus, proportional inequality narrowed: the most advantaged quintile moved from being about **6.6 times** as likely as Q1 pupils to enter high-tariff providers to about **3.8 times** as likely. But this should not be mistaken for parity or near-parity. When one group’s baseline is only 3–7%, even substantial proportional gains can coexist with a persistent and policy-salient absolute exclusion gap.
+
+### Trend model
+
+The linear trend for the **absolute** high-tariff gap indicates a statistically significant widening:
+
+- **Slope**: **+0.125 percentage points per year**
+- **95% CI**: **[+0.040, +0.210]**
+- **p = 0.008**
+- **R² = 0.460**
+
+Because the confidence interval excludes zero, the evidence supports the conclusion that the **absolute POLAR high-tariff gap widened** over the period.
+
+By contrast, the **relative** high-tariff ratio declined significantly:
+
+- **Slope**: **−0.230 per year**
+- **95% CI**: **[−0.256, −0.203]**
+- **p < 0.001**
+- **R² = 0.968**
+
+This combination—**absolute widening but relative narrowing**—is substantively important. It indicates that disadvantaged students have improved their high-tariff progression rate from a very low base, but the advantaged group has retained or increased its absolute lead. In policy terms, the selective-provider pipeline remains structurally unequal even where proportional disparities have reduced.
+
+---
+
+## Contrasting overall access with selective access
+
+The principal substantive finding is that **the story is more favourable for access to any HE than for access to high-tariff HE**.
+
+### In 2022/23
+
+For POLAR:
+
+- **Overall progression**
+  - Q1: **31.7%**
+  - Q5: **62.1%**
+  - Absolute gap: **30.4 pp**
+  - Ratio: **1.96**
+
+- **High-tariff progression**
+  - Q1: **7.1%**
+  - Q5: **26.8%**
+  - Absolute gap: **19.7 pp**
+  - Ratio: **3.77**
+
+The high-tariff gap is smaller in percentage-point terms than the overall gap, but far larger in **proportional** terms. That is, selective institutions remain much more stratified than HE as a whole.
+
+### Conversion Ratio: selectivity conditional on entering HE
+
+The Conversion Ratio clarifies how much of the inequality arises after HE entry becomes possible. Figure `data/compounding_disadvantage.png` shows the 2022/23 percentage of HE entrants who go on to high-tariff providers.
+
+For POLAR:
+
+- **Q5 Conversion Ratio**: approximately **43.2%**
+- **Q1 Conversion Ratio**: approximately **22.6%**
+- **Selectivity penalty**: **20.6 pp**
+- **Ratio**: **1.92×**
+
+This means that among students who do progress to HE, those from the most advantaged POLAR quintile are almost **twice as likely** as those from the most disadvantaged quintile to enter a high-tariff institution. The disadvantage therefore does not end at HE entry; it intensifies within the distribution of institutional selectivity.
+
+This is the core “compounding disadvantage” result. A disadvantaged group first faces lower overall progression; then, conditional on entering HE, it faces a second barrier in conversion into the selective segment.
+
+---
+
+## Cross-dimensional equity benchmarking in 2022/23
+
+Figure `data/equity_benchmarking.png` and the ranking file `data/cross_dimensional_rankings.csv` compare the largest within-topic gaps for the latest year. The ranking uses the highest- and lowest-progressing categories within each breakdown topic and orders topics by the **absolute overall progression gap**.
+
+### Ranked by overall HE progression gap
+
+1. **Ethnicity Minor**: **72.5 pp**
+   - Advantaged: **Chinese**
+   - Disadvantaged: **Traveller of Irish Heritage**
+   - Relative ratio: **7.30**
+   - High-tariff gap: **44.1 pp**
+   - High-tariff ratio: **9.65**
+
+2. **SEN Provision**: **41.9 pp**
+   - Advantaged: **No SEN provision**
+   - Disadvantaged: **Education, health and care plan**
+   - Relative ratio: **5.51**
+   - High-tariff gap: **15.5 pp**
+   - High-tariff ratio: **10.69**
+
+3. **Children in Need**: **34.0 pp**
+   - Advantaged: **All Other Pupils**
+   - Disadvantaged: **Children in Need**
+   - Relative ratio: **3.43**
+   - High-tariff gap: **14.0 pp**
+   - High-tariff ratio: **8.00**
+
+4. **Looked After Status**: **32.0 pp**
+   - Advantaged: **All Other Pupils**
+   - Disadvantaged: **Looked after continuously for 12 months or more**
+   - Relative ratio: **3.13**
+   - High-tariff gap: **13.0 pp**
+   - High-tariff ratio: **7.50**
+
+5. **SEN Status**: **30.5 pp**
+   - Advantaged: **No identified SEN**
+   - Disadvantaged: **Any special educational need**
+   - Relative ratio: **2.47**
+   - High-tariff gap: **12.8 pp**
+   - High-tariff ratio: **3.98**
+
+6. **POLAR**: **30.4 pp**
+   - Advantaged: **Q5**
+   - Disadvantaged: **Q1**
+   - Relative ratio: **1.96**
+   - High-tariff gap: **19.7 pp**
+   - High-tariff ratio: **3.77**
+
+7. **Ethnicity Major**: **26.6 pp**
+   - Advantaged: **Asian / Asian British**
+   - Disadvantaged: **White**
+   - Relative ratio: **1.64**
+   - High-tariff gap: **10.4 pp**
+   - High-tariff ratio: **1.76**
+
+8. **FSM Status**: **20.8 pp**
+   - Advantaged: **All Other Pupils**
+   - Disadvantaged: **Free School Meals**
+   - Relative ratio: **1.72**
+   - High-tariff gap: **10.7 pp**
+   - High-tariff ratio: **2.75**
+
+9. **Disadvantage**: **19.9 pp**
+   - Advantaged: **All Other Pupils**
+   - Disadvantaged: **Disadvantaged**
+   - Relative ratio: **1.62**
+   - High-tariff gap: **11.2 pp**
+   - High-tariff ratio: **2.62**
+
+10. **First Language**: **17.1 pp**
+    - Advantaged: **Other than English**
+    - Disadvantaged: **English**
+    - Relative ratio: **1.39**
+    - High-tariff gap: **4.1 pp**
+    - High-tariff ratio: **1.28**
+
+11. **Sex**: **13.2 pp**
+    - Advantaged: **Female**
+    - Disadvantaged: **Male**
+    - Relative ratio: **1.33**
+    - High-tariff gap: **4.5 pp**
+    - High-tariff ratio: **1.34**
+
+### Interpretation of the ranking
+
+Three substantive points follow.
+
+First, **area disadvantage is important but not uniquely dominant**. POLAR ranks in the middle of the distribution: a very large gap remains, but some other dimensions show even larger inequalities, especially when highly vulnerable groups or finely disaggregated ethnic groups are examined.
+
+Second, **SEN- and care-related vulnerabilities stand out strongly**. The gaps for SEN provision, children in need, and looked-after status all exceed or closely match the POLAR gap in overall HE progression. This suggests that educational vulnerability and social care exposure are major lines of stratification in post-19 progression.
+
+Third, detailed ethnicity shows the **largest internal disparities**, but these results require careful interpretation because some categories are small. The Chinese versus Traveller of Irish Heritage contrast is undeniably large in the published data, but because Ethnicity Minor includes very small cohorts in some years, this ranking should be interpreted as a marker of severe inequality rather than a precision-equivalent comparator to broad national categories.
+
+---
+
+## Compounding disadvantage and selectivity penalties
+
+Figure `data/compounding_disadvantage.png` provides the clearest demonstration that inequality compounds between “any HE” and “high-tariff HE”. For selected major dimensions in 2022/23, the Conversion Ratio gaps are:
+
+- **POLAR (Q5 vs Q1)**: **20.6 pp**, ratio **1.92×**
+- **Disadvantage (Other vs Disadvantaged)**: **13.1 pp**, ratio **1.61×**
+- **FSM Status (Other vs FSM)**: **12.5 pp**, ratio **1.59×**
+- **SEN Status (No SEN vs Any SEN)**: **12.8 pp**, ratio **1.62×**
+- **Sex (Female vs Male)**: **0.5 pp**, ratio **1.01×**
+
+These results help disentangle two mechanisms.
+
+### 1. Access barriers into HE
+
+Disadvantaged groups are already less likely to enter HE at all. This is visible in the overall progression gaps for POLAR, FSM, disadvantage, and SEN.
+
+### 2. Selective allocation within HE
+
+Conditional on entering HE, disadvantaged groups then have a lower probability of entering a high-tariff provider. The size of this within-HE selectivity penalty is substantial for POLAR, disadvantage, FSM, and SEN, but negligible for sex.
+
+This matters for policy interpretation. A small sex difference in Conversion Ratio despite a larger overall HE gap implies that male disadvantage is concentrated more in **entering HE** than in **selective allocation once in HE**. By contrast, POLAR, FSM, and SEN exhibit both kinds of penalty. These dimensions are therefore associated with a more structurally layered form of inequality.
+
+The POLAR case is particularly stark. In 2022/23, roughly **43%** of HE entrants from Q5 went to a high-tariff provider, compared with about **23%** from Q1. Thus, even once access to HE has been achieved, the disadvantaged group remains sharply under-represented in the selective sector.
+
+---
+
+## Reading the COVID-affected period
+
+The period from **2020/21 to 2022/23** is shaded in Figure `data/polar_trend_gaps.png` and should be interpreted descriptively. Several observations are relevant.
+
+- The **overall POLAR gap** stayed close to **30 pp** during this period:
+  - **29.7 pp** in 2020/21
+  - **30.1 pp** in 2021/22
+  - **30.4 pp** in 2022/23
+
+- The **high-tariff POLAR gap** remained high and then increased:
+  - **17.8 pp** in 2020/21
+  - **18.1 pp** in 2021/22
+  - **19.7 pp** in 2022/23
+
+These years do not overturn the long-run findings, but they do underscore that the selective gap has not eased in recent observations. Since only three post-2020 points are available, and because these years were shaped by exceptional admissions and assessment conditions, the prudent interpretation is that the COVID-affected period **did not produce visible convergence at the selective end**. It may instead have preserved or accentuated pre-existing inequality, but the present design does not support stronger causal attribution.
+
+---
+
+## Policy-oriented interpretation
+
+From a widening participation perspective, the evidence supports four principal conclusions.
+
+### 1. Access to any HE has become somewhat more equal, but inequality remains entrenched
+
+The POLAR overall gap narrowed significantly by about **0.33 pp per year**, and the relative ratio fell from **2.85** to **1.96**. This is meaningful progress, but it is not transformation. In 2022/23, the most advantaged POLAR quintile still had an overall progression rate of **62.1%**, against **31.7%** for the most disadvantaged.
+
+### 2. Selective higher education remains markedly less equal than higher education overall
+
+For high-tariff providers, the absolute POLAR gap **widened** by about **0.13 pp per year** on average. The 2022/23 gap of **19.7 pp** is larger than in 2009/10. The proportional gap has narrowed, but primarily because disadvantaged groups improved from extremely low starting points. The selective pipeline therefore remains substantially more stratified than the HE system as a whole.
+
+### 3. Disadvantage is multi-dimensional
+
+POLAR is not the only, or always the largest, cleavage. In 2022/23, very large inequalities were also evident by **SEN provision**, **care-related status**, and **detailed ethnicity**. A policy framework focused too narrowly on area disadvantage would miss other major forms of educational exclusion.
+
+### 4. Some inequalities are compounded after HE entry
+
+The Conversion Ratio results show that for POLAR, FSM, disadvantage, and SEN, the path from school to selective HE contains two hurdles: lower overall progression and lower conversion into high-tariff institutions among those who do progress. This is why high-tariff equity cannot be inferred from overall HE participation alone.
+
+---
+
+## Concluding statement
+
+Taken together, the figures and tables show a system in which **headline access has improved more than selective access**. The long-run trend for POLAR indicates that **overall participation gaps are narrowing**, but only gradually. At the same time, the gap in access to **high-tariff institutions has widened in absolute terms**, and the Conversion Ratio evidence shows that this is not simply a reflection of lower HE participation overall: disadvantaged groups are also less likely to convert HE entry into selective HE entry.
+
+The latest-year benchmarking reinforces the broader policy message. Structural inequality in English higher education is not reducible to a single disadvantage measure. Area disadvantage, FSM, SEN, care experience, and ethnicity all reveal substantial and in some cases severe disparities. For policy audiences, the practical implication is that widening participation should be judged not only by whether more disadvantaged pupils enter higher education, but also by **where they enter**, because institutional selectivity remains a major site of persistent inequality.
+
+**Respond in exactly this format:**
+
+\\begin{COMMENTS}
+<COMMENTS>
+\\end{COMMENTS}
+
+In <COMMENTS>, put your comments. Your comments should be short, unless you identify issues with the input data description.
+
+###### PROMPT ENDS ########
+
+
+###### PROMPT BEGINS ########
 Human: You are provided with the following inputs:
 
 1) A description of a dataset
@@ -495,594 +1231,11 @@ In <FEEDBACK>, put your evaluation.
 
 ###### PROMPT ENDS ########
 
-Human: You are provided with the following inputs:
 
-1) A description of a dataset
-2) A current scientific idea or hypothesis
-3) A current research plan
-4) The results obtained from executing that plan
-
-**Your task is to assess whether any limitations, failures, or ambiguities in the analysis are directly attributable to constraints described in the dataset description.**
-
-Examples of such constraints include (but are not limited to):
-- required preprocessing steps or exclusions,
-- missing variables or incomplete coverage,
-- limited sample size or class imbalance,
-- measurement noise, censoring, or aggregation,
-- assumptions imposed by how the data were collected or curated.
-
-**Scope restriction (important)**:
-- Focus only on the dataset description.
-- Do not critique the scientific idea, hypothesis, or research plan.
-- Do not suggest alternative methods or models.
-- Other agents are responsible for methodological or conceptual feedback.
-
-**If a data-level constraint plausibly explains observed failures or weak results, describe:**
-- which constraint is responsible,
-- how it limits the analysis,
-- and what type of conclusions are affected.
-
-If no such constraints are evident, explicitly state that the dataset description does not appear to explain the observed issues.
-
-Data description:
-## Dataset: Widening Participation in Higher Education — "All Characteristics" (DfE, real published data)
-
-**File (absolute path — load exactly this):** `/Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv` (already present — load this; do NOT generate synthetic data). The analysis code runs from a different working directory, so always use this absolute path, never a relative one.
-
-**Provenance:** UK Department for Education, *Widening participation in higher education* official statistics (2023-24 release), obtained from Explore Education Statistics (gov.uk). Permalink:
-https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/c3f0cae9-a2f7-4363-9d48-b7a410072a6f
-Direct CSV: append `/csv` to that URL. **Licence:** Open Government Licence v3.0 (free to use/share with attribution).
-
-**Coverage:** England, national level, academic years **2009/10 → 2022/23** (14 years). The statistic measures **progression to higher education by age 19** — i.e. the percentage of a state-school cohort who enter HE — broken down by pupil characteristic. 666 data rows, tidy long format, aggregate (rates + headcounts, no personal data).
-
-### Schema (one row per year × characteristic-category)
-- `time_period` — academic year as `YYYYYY` (e.g. `201920` = 2019/20)
-- `time_identifier` — "Academic year"
-- `geographic_level`, `country_code`, `country_name` — England, national
-- `breakdown_topic` — the characteristic dimension. Values present:
-  **POLAR** (area HE-participation quintile, the core WP measure), **Disadvantage** (FSM-based disadvantage flag), **FSM Status**, **Ethnicity Major**, **Ethnicity Minor**, **Sex**, **SEN Status**, **SEN Provision**, **Looked After Status**, **Children in Need**, **First Language**
-- `breakdown` — the category within that topic, e.g. for POLAR: `Q1 - Most Disadvantaged`, `Q2`, `Q3`, `Q4`, `Q5 - Most Advantaged`, `Unknown`
-- `progression_rate` — % of the cohort progressing to **any** HE (the headline access rate)
-- `high_tariff_progression_rate` — % progressing to a **high-tariff** (selective) provider — the sharper equity measure
-- `number_of_he_students` — count progressing to HE
-- `number_of_high_tariff_he_students` — count progressing to high-tariff HE
-- `number_of_students` — cohort size (denominator)
-
-### Research aim (widening participation)
-Quantify and explain access gaps in English HE progression across disadvantage measures, and track how they have changed over 14 years — with particular attention to the gap at **high-tariff** providers.
-
-Questions of interest:
-1. **POLAR gap over time:** how large is the Q1 (most disadvantaged) vs Q5 (most advantaged) gap in overall progression, and how has it changed 2009/10→2022/23? Is it narrowing, static, or widening?
-2. **The high-tariff gap:** repeat (1) for `high_tariff_progression_rate`. The high-tariff gap is far wider in proportional terms (e.g. ~3% vs ~20%) — quantify the ratio and absolute gap, and its trend.
-3. **Which characteristic divides most?** Compare gap magnitudes across POLAR, FSM/Disadvantage, ethnicity, sex, SEN and looked-after status. Rank the dimensions by equity gap.
-4. **Compounding disadvantage:** for groups with both overall and high-tariff rates, show how disadvantage compounds as you move from "any HE" to "selective HE".
-5. **Trend in the gap:** fit a single simple linear trend to the Q1–Q5 gap (overall and high-tariff) over the available years and report the slope **with a confidence interval**, to say whether the gap is narrowing, static, or widening. Flag 2020/21 onward as COVID-affected (annotate, don't model as a separate regime). Do **not** fit segmented/structural-break regressions or extrapolate a "projected year of parity" — there are only ~14 annual points per series (and just 3 after 2020/21), far too few to identify a post-break slope or a credible extrapolation.
-
-### Expected outputs
-- Time-series gap plots: Q1 vs Q5 POLAR progression (overall and high-tariff) across cycles, with the absolute gap and gap ratio annotated.
-- A ranked comparison of equity gaps across all breakdown topics for the latest year.
-- A simple linear trend of the gap over time: slope **with confidence interval** and significance, with 2020/21+ annotated as COVID-affected (no structural-break model, no parity extrapolation).
-- A concise, policy-audience Results narrative grounded in the real figures.
-
-### Notes for the analysis code
-- Parse `time_period` (`YYYYYY`) into a readable cycle label and an integer year for trend fitting.
-- Treat `Unknown` categories as a separate series; exclude from gap calculations unless explicitly analysing data quality.
-- Rates are percentages already; use the headcounts (`number_of_he_students` / `number_of_students`, and the high-tariff counts) to attach **Wilson/binomial confidence intervals** to every rate and gap — quantitative claims should carry error bars, not bare point estimates.
-- **Statistical scope (the data is granular, not large):** the 666 rows are aggregate published rates organised as topic × category × year, not independent samples. Any trend is a series of **at most 14 annual points** per (topic, category) — and only 8–10 for `Children in Need` / `Disadvantage`, with just 3 points after 2020/21. Keep methods proportionate: descriptive equity benchmarking (RRR, selectivity scores, gap rankings) and a single simple linear trend with CIs are well-supported; segmented/structural-break regressions, multivariable models, and parity extrapolations are **not** — don't attempt them.
-
-
-Idea: 
-**Title**: Benchmarking Structural Inequality: A Comparative Analysis of Absolute Progression and Institutional Selectivity Gaps (2009/10–2022/23)
-
-**Description**: This research quantifies the 14-year evolution of equity gaps in English HE, distinguishing between overall progression rates and selective "high-tariff" access. We define the "Conversion Ratio" as the proportion of HE-enrolled students entering high-tariff providers, applying Wilson binomial confidence intervals to mitigate volatility in small-cohort subgroups like Looked After Status and SEN provision. To ensure analytical robustness, we perform a sensitivity analysis by aggregating sparse cohorts where necessary, preventing noise-driven outliers from skewing trend estimates. We calculate the absolute progression gap (Q1–Q5 POLAR) and the conversion disparity, fitting simple linear period-average slopes with 95% confidence intervals to measure the magnitude of change. The 2020/21–2022/23 period is explicitly flagged as a high-volatility window influenced by non-standard assessment practices, ensuring these years are treated as descriptive observations rather than indicators of long-term structural shifts. This dual-metric framework isolates whether demographic disparities are primarily driven by barriers to initial HE entry or by systemic exclusion from selective institutional pipelines.
-
-Research plan:
-1. **Data Preparation and Sparsity Assessment**
-   - Load the dataset from `/Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv`.
-   - Parse `time_period` into an integer year (start of academic cycle).
-   - Perform a data sparsity check: identify subgroups with consistently low cohort sizes (e.g., Looked After Status). Flag these in the analysis to ensure volatility is interpreted with caution.
-   - Filter out `Unknown` categories from primary gap calculations, retaining them only for data quality validation.
-
-2. **Statistical Uncertainty Estimation**
-   - Calculate 95% Wilson score intervals for all `progression_rate` and `high_tariff_progression_rate` values.
-   - For absolute gaps ($Rate_{A} - Rate_{B}$), calculate the variance of the difference as the sum of the individual variances ($Var(p_1) + Var(p_2)$) to derive the confidence interval.
-   - For gap ratios ($Rate_{A} / Rate_{B}$), use the Delta Method to propagate uncertainty and derive the 95% confidence interval for the ratio.
-
-3. **Defining the Dual-Metric Framework**
-   - Calculate the "Conversion Ratio" ($number\_of\_high\_tariff\_he\_students / number\_of\_he\_students$) for each subgroup.
-   - Explicitly distinguish in all reporting between the "High-Tariff Progression Rate" (access from the total cohort) and the "Conversion Ratio" (institutional selection bias given HE entry).
-   - Apply uncertainty propagation to the Conversion Ratio to ensure selectivity penalties are statistically defensible.
-
-4. **Trend Analysis of Gaps**
-   - Isolate POLAR Q1 and Q5 series for overall and high-tariff progression.
-   - Fit a simple linear regression to the absolute and relative gaps over the 14-year period.
-   - Extract the slope coefficient and 95% confidence interval.
-   - Perform a visual inspection of residuals to check for non-linear patterns or autocorrelation, noting any limitations of the linear model in the final narrative.
-
-5. **Cross-Dimensional Equity Benchmarking**
-   - For the most recent academic year, calculate the absolute and relative gaps between the most advantaged and most disadvantaged categories for every `breakdown_topic`.
-   - Rank these dimensions by the magnitude of the absolute gap to identify the primary drivers of inequality.
-
-6. **Compounding Disadvantage Analysis**
-   - Visualize the "drop-off" from overall HE progression to high-tariff progression for selected groups.
-   - Quantify the "selectivity penalty" by comparing the Conversion Ratios of disadvantaged groups against their more advantaged counterparts.
-
-7. **Visualization Strategy**
-   - Generate time-series plots for POLAR Q1 vs Q5 progression, including shaded regions for Wilson confidence intervals.
-   - Produce a ranked bar chart of equity gaps across all breakdown topics for the latest year.
-   - Annotate the 2020/21–2022/23 period as COVID-affected in all plots and include summary statistics (slope/significance) for trends.
-
-8. **Synthesis and Reporting**
-   - Compile a policy-audience narrative contrasting the "access gap" (overall) with the "selectivity gap" (high-tariff).
-   - Use the calculated slopes, confidence intervals, and gap ratios to provide a definitive statement on the trajectory of equity gaps, ensuring that small-cohort volatility and the COVID-19 period are contextualized as descriptive observations.
-
-Analysis results:
-# Results: Benchmarking Structural Inequality in English Higher Education Progression, 2009/10–2022/23
-
-## Overview
-
-This analysis used the Department for Education’s published national-level widening participation dataset for England, covering academic years 2009/10 to 2022/23, to compare inequalities in progression to higher education by age 19 across multiple pupil characteristics. The central distinction throughout is between:
-
-- **overall HE progression**: entry to any higher education; and
-- **high-tariff progression**: entry to a more selective provider from the full state-school cohort.
-
-A third metric, the **Conversion Ratio**, was derived to isolate selectivity conditional on having entered HE:
-
-\[
-\text{Conversion Ratio} = \frac{\text{number of high-tariff HE students}}{\text{number of HE students}}
-\]
-
-This separates barriers to entering HE at all from barriers to reaching selective institutions once in HE’s applicant and entrant pipeline.
-
-Unknown categories were excluded from substantive gap calculations, in line with the design brief. Uncertainty around rates was represented using **95% Wilson score intervals**; gap uncertainty for differences was propagated from component variances, and ratio uncertainty was estimated using a log-scale delta method. Trend analysis was intentionally limited to a **single simple linear regression** on annual gap series, reflecting the modest number of time points and the instruction not to fit structural-break models or project parity dates. The years **2020/21 onward** are treated as a **COVID-affected descriptive period**, not as a separately estimated regime.
-
-Across the full period, the results show a clear asymmetry. **Overall POLAR gaps narrowed modestly but significantly**, whereas **high-tariff POLAR gaps widened in absolute terms**, despite some narrowing in relative terms because disadvantaged groups started from an extremely low base. In 2022/23, the largest disparities in the system were not solely by area disadvantage: some of the starkest divides were by **detailed ethnicity**, **SEN provision**, and care-related vulnerability. The evidence therefore points to a layered pattern of inequality: access gaps into HE remain large, and selective access gaps often compound them further.
-
----
-
-## Data quality, scope, and interpretive caution
-
-The underlying file contains **666 rows**, of which **624** remained after excluding **42 `Unknown` rows** from primary comparisons. The data are aggregated, national statistics rather than person-level observations. This has several implications.
-
-First, the estimates are precise for large groups, but volatility can still arise where subgroup numerators are small even if denominators are not. The sparsity check showed especially small minimum cohort sizes within **Ethnicity Minor** categories, and to a lesser extent in some vulnerable-status breakdowns. For example, the minimum observed subgroup denominator in Ethnicity Minor was **111**, far smaller than the large national categories used elsewhere. Consequently, the most extreme rankings for finely disaggregated ethnic groups should be interpreted as substantively important but potentially more sensitive to small-number variation than broad categories such as sex, FSM, or POLAR.
-
-Second, trend inference is necessarily limited by the annual time series length. For POLAR there are only **14 annual observations**. The fitted slopes therefore support statements about the **direction and approximate average yearly change** over the period, but not stronger causal claims about policy interventions, regime changes, or post-pandemic structural breaks.
-
-Third, the COVID-affected years should not be read as establishing a new long-run trajectory. They are best treated as recent descriptive observations in a period shaped by non-standard assessment, admissions, and progression conditions.
-
----
-
-## POLAR inequality over time: overall progression to any HE
-
-### Levels and trajectory
-
-Figure `data/polar_trend_gaps.png` shows the long-run trajectories for POLAR quintiles Q1 and Q5. Across the full period, both groups increased their overall HE progression rates, but the increase was larger in percentage terms for the most disadvantaged group.
-
-- **Q1 overall progression** rose from **18.0%** in **2009/10** to **31.7%** in **2022/23**.
-- **Q5 overall progression** rose from **51.3%** to **62.1%** over the same period.
-
-Because Q1 improved faster than Q5 in absolute terms, the **Q5–Q1 absolute gap in overall progression** narrowed:
-
-- **2009/10**: **33.3 percentage points**
-- **2022/23**: **30.4 percentage points**
-
-The year-by-year series indicates that the overall gap was highest in the early years, peaking at **34.1 pp** in **2011/12**, then gradually declining to around **30–31 pp** in the later period. The shrinkage is real but limited in substantive magnitude: after 14 years, the gap remains about **30 percentage points**, meaning the most advantaged POLAR group still progresses to HE at nearly double the rate of the most disadvantaged group.
-
-### Relative inequality
-
-Relative inequality narrowed more sharply than the absolute gap because the disadvantaged baseline rate rose materially.
-
-- The **overall Q5:Q1 progression ratio** fell from **2.85** in **2009/10** to **1.96** in **2022/23**.
-
-Thus, by 2022/23 the most advantaged group was still progressing to HE at almost **twice** the rate of the most disadvantaged group, but this is substantially less unequal than the near-**threefold** disparity at the start of the series.
-
-### Trend model
-
-The linear trend fitted to the annual absolute POLAR gap confirms a statistically reliable narrowing:
-
-- **Slope**: **−0.328 percentage points per year**
-- **95% CI**: **[−0.412, −0.244]**
-- **p < 0.001**
-- **R² = 0.858**
-
-Because the 95% confidence interval excludes zero, the evidence supports the conclusion that the **overall POLAR gap narrowed over 2009/10–2022/23**. The fit is strong in descriptive terms. The Durbin–Watson statistic of **1.88** does not suggest severe residual autocorrelation, so the simple trend line is an adequate summary of the broad direction.
-
-The relative gap series shows an even stronger downward pattern:
-
-- **Relative-gap slope**: **−0.074 per year**
-- **95% CI**: **[−0.083, −0.066]**
-- **p < 0.001**
-- **R² = 0.969**
-
-On both absolute and relative measures, then, the overall POLAR access gap has **narrowed**, not widened. However, the pace of change is modest relative to the size of the residual inequality.
-
----
-
-## POLAR inequality over time: high-tariff progression
-
-### Levels and trajectory
-
-The picture changes sharply when attention shifts from any HE to high-tariff providers. Figure `data/polar_trend_gaps.png` shows that high-tariff participation remains low for Q1 throughout, while Q5 retains much higher access.
-
-- **Q1 high-tariff progression** rose from **3.0%** in **2009/10** to **7.1%** in **2022/23**.
-- **Q5 high-tariff progression** rose from **20.3%** to **26.8%**.
-
-In relative terms, Q1 more than doubled from a very low base. Yet the absolute distance between groups remained extremely large and in the latest year was larger than at the start.
-
-The **Q5–Q1 high-tariff absolute gap** was:
-
-- **17.3 pp** in **2009/10**
-- **19.7 pp** in **2022/23**
-
-The series fluctuates around the high teens, with a visible increase in the most recent year. The COVID-affected period does not show a clean break in level, but it does show persistence of a large disadvantage and a marked widening in 2022/23.
-
-### Relative inequality
-
-The relative ratio tells a somewhat different story because Q1 begins from a very small denominator.
-
-- **High-tariff Q5:Q1 ratio** fell from **6.58** in **2009/10** to **3.77** in **2022/23**.
-
-Thus, proportional inequality narrowed: the most advantaged quintile moved from being about **6.6 times** as likely as Q1 pupils to enter high-tariff providers to about **3.8 times** as likely. But this should not be mistaken for parity or near-parity. When one group’s baseline is only 3–7%, even substantial proportional gains can coexist with a persistent and policy-salient absolute exclusion gap.
-
-### Trend model
-
-The linear trend for the **absolute** high-tariff gap indicates a statistically significant widening:
-
-- **Slope**: **+0.125 percentage points per year**
-- **95% CI**: **[+0.040, +0.210]**
-- **p = 0.008**
-- **R² = 0.460**
-
-Because the confidence interval excludes zero, the evidence supports the conclusion that the **absolute POLAR high-tariff gap widened** over the period.
-
-By contrast, the **relative** high-tariff ratio declined significantly:
-
-- **Slope**: **−0.230 per year**
-- **95% CI**: **[−0.256, −0.203]**
-- **p < 0.001**
-- **R² = 0.968**
-
-This combination—**absolute widening but relative narrowing**—is substantively important. It indicates that disadvantaged students have improved their high-tariff progression rate from a very low base, but the advantaged group has retained or increased its absolute lead. In policy terms, the selective-provider pipeline remains structurally unequal even where proportional disparities have reduced.
-
----
-
-## Contrasting overall access with selective access
-
-The principal substantive finding is that **the story is more favourable for access to any HE than for access to high-tariff HE**.
-
-### In 2022/23
-
-For POLAR:
-
-- **Overall progression**
-  - Q1: **31.7%**
-  - Q5: **62.1%**
-  - Absolute gap: **30.4 pp**
-  - Ratio: **1.96**
-
-- **High-tariff progression**
-  - Q1: **7.1%**
-  - Q5: **26.8%**
-  - Absolute gap: **19.7 pp**
-  - Ratio: **3.77**
-
-The high-tariff gap is smaller in percentage-point terms than the overall gap, but far larger in **proportional** terms. That is, selective institutions remain much more stratified than HE as a whole.
-
-### Conversion Ratio: selectivity conditional on entering HE
-
-The Conversion Ratio clarifies how much of the inequality arises after HE entry becomes possible. Figure `data/compounding_disadvantage.png` shows the 2022/23 percentage of HE entrants who go on to high-tariff providers.
-
-For POLAR:
-
-- **Q5 Conversion Ratio**: approximately **43.2%**
-- **Q1 Conversion Ratio**: approximately **22.6%**
-- **Selectivity penalty**: **20.6 pp**
-- **Ratio**: **1.92×**
-
-This means that among students who do progress to HE, those from the most advantaged POLAR quintile are almost **twice as likely** as those from the most disadvantaged quintile to enter a high-tariff institution. The disadvantage therefore does not end at HE entry; it intensifies within the distribution of institutional selectivity.
-
-This is the core “compounding disadvantage” result. A disadvantaged group first faces lower overall progression; then, conditional on entering HE, it faces a second barrier in conversion into the selective segment.
-
----
-
-## Cross-dimensional equity benchmarking in 2022/23
-
-Figure `data/equity_benchmarking.png` and the ranking file `data/cross_dimensional_rankings.csv` compare the largest within-topic gaps for the latest year. The ranking uses the highest- and lowest-progressing categories within each breakdown topic and orders topics by the **absolute overall progression gap**.
-
-### Ranked by overall HE progression gap
-
-1. **Ethnicity Minor**: **72.5 pp**
-   - Advantaged: **Chinese**
-   - Disadvantaged: **Traveller of Irish Heritage**
-   - Relative ratio: **7.30**
-   - High-tariff gap: **44.1 pp**
-   - High-tariff ratio: **9.65**
-
-2. **SEN Provision**: **41.9 pp**
-   - Advantaged: **No SEN provision**
-   - Disadvantaged: **Education, health and care plan**
-   - Relative ratio: **5.51**
-   - High-tariff gap: **15.5 pp**
-   - High-tariff ratio: **10.69**
-
-3. **Children in Need**: **34.0 pp**
-   - Advantaged: **All Other Pupils**
-   - Disadvantaged: **Children in Need**
-   - Relative ratio: **3.43**
-   - High-tariff gap: **14.0 pp**
-   - High-tariff ratio: **8.00**
-
-4. **Looked After Status**: **32.0 pp**
-   - Advantaged: **All Other Pupils**
-   - Disadvantaged: **Looked after continuously for 12 months or more**
-   - Relative ratio: **3.13**
-   - High-tariff gap: **13.0 pp**
-   - High-tariff ratio: **7.50**
-
-5. **SEN Status**: **30.5 pp**
-   - Advantaged: **No identified SEN**
-   - Disadvantaged: **Any special educational need**
-   - Relative ratio: **2.47**
-   - High-tariff gap: **12.8 pp**
-   - High-tariff ratio: **3.98**
-
-6. **POLAR**: **30.4 pp**
-   - Advantaged: **Q5**
-   - Disadvantaged: **Q1**
-   - Relative ratio: **1.96**
-   - High-tariff gap: **19.7 pp**
-   - High-tariff ratio: **3.77**
-
-7. **Ethnicity Major**: **26.6 pp**
-   - Advantaged: **Asian / Asian British**
-   - Disadvantaged: **White**
-   - Relative ratio: **1.64**
-   - High-tariff gap: **10.4 pp**
-   - High-tariff ratio: **1.76**
-
-8. **FSM Status**: **20.8 pp**
-   - Advantaged: **All Other Pupils**
-   - Disadvantaged: **Free School Meals**
-   - Relative ratio: **1.72**
-   - High-tariff gap: **10.7 pp**
-   - High-tariff ratio: **2.75**
-
-9. **Disadvantage**: **19.9 pp**
-   - Advantaged: **All Other Pupils**
-   - Disadvantaged: **Disadvantaged**
-   - Relative ratio: **1.62**
-   - High-tariff gap: **11.2 pp**
-   - High-tariff ratio: **2.62**
-
-10. **First Language**: **17.1 pp**
-    - Advantaged: **Other than English**
-    - Disadvantaged: **English**
-    - Relative ratio: **1.39**
-    - High-tariff gap: **4.1 pp**
-    - High-tariff ratio: **1.28**
-
-11. **Sex**: **13.2 pp**
-    - Advantaged: **Female**
-    - Disadvantaged: **Male**
-    - Relative ratio: **1.33**
-    - High-tariff gap: **4.5 pp**
-    - High-tariff ratio: **1.34**
-
-### Interpretation of the ranking
-
-Three substantive points follow.
-
-First, **area disadvantage is important but not uniquely dominant**. POLAR ranks in the middle of the distribution: a very large gap remains, but some other dimensions show even larger inequalities, especially when highly vulnerable groups or finely disaggregated ethnic groups are examined.
-
-Second, **SEN- and care-related vulnerabilities stand out strongly**. The gaps for SEN provision, children in need, and looked-after status all exceed or closely match the POLAR gap in overall HE progression. This suggests that educational vulnerability and social care exposure are major lines of stratification in post-19 progression.
-
-Third, detailed ethnicity shows the **largest internal disparities**, but these results require careful interpretation because some categories are small. The Chinese versus Traveller of Irish Heritage contrast is undeniably large in the published data, but because Ethnicity Minor includes very small cohorts in some years, this ranking should be interpreted as a marker of severe inequality rather than a precision-equivalent comparator to broad national categories.
-
----
-
-## Compounding disadvantage and selectivity penalties
-
-Figure `data/compounding_disadvantage.png` provides the clearest demonstration that inequality compounds between “any HE” and “high-tariff HE”. For selected major dimensions in 2022/23, the Conversion Ratio gaps are:
-
-- **POLAR (Q5 vs Q1)**: **20.6 pp**, ratio **1.92×**
-- **Disadvantage (Other vs Disadvantaged)**: **13.1 pp**, ratio **1.61×**
-- **FSM Status (Other vs FSM)**: **12.5 pp**, ratio **1.59×**
-- **SEN Status (No SEN vs Any SEN)**: **12.8 pp**, ratio **1.62×**
-- **Sex (Female vs Male)**: **0.5 pp**, ratio **1.01×**
-
-These results help disentangle two mechanisms.
-
-### 1. Access barriers into HE
-
-Disadvantaged groups are already less likely to enter HE at all. This is visible in the overall progression gaps for POLAR, FSM, disadvantage, and SEN.
-
-### 2. Selective allocation within HE
-
-Conditional on entering HE, disadvantaged groups then have a lower probability of entering a high-tariff provider. The size of this within-HE selectivity penalty is substantial for POLAR, disadvantage, FSM, and SEN, but negligible for sex.
-
-This matters for policy interpretation. A small sex difference in Conversion Ratio despite a larger overall HE gap implies that male disadvantage is concentrated more in **entering HE** than in **selective allocation once in HE**. By contrast, POLAR, FSM, and SEN exhibit both kinds of penalty. These dimensions are therefore associated with a more structurally layered form of inequality.
-
-The POLAR case is particularly stark. In 2022/23, roughly **43%** of HE entrants from Q5 went to a high-tariff provider, compared with about **23%** from Q1. Thus, even once access to HE has been achieved, the disadvantaged group remains sharply under-represented in the selective sector.
-
----
-
-## Reading the COVID-affected period
-
-The period from **2020/21 to 2022/23** is shaded in Figure `data/polar_trend_gaps.png` and should be interpreted descriptively. Several observations are relevant.
-
-- The **overall POLAR gap** stayed close to **30 pp** during this period:
-  - **29.7 pp** in 2020/21
-  - **30.1 pp** in 2021/22
-  - **30.4 pp** in 2022/23
-
-- The **high-tariff POLAR gap** remained high and then increased:
-  - **17.8 pp** in 2020/21
-  - **18.1 pp** in 2021/22
-  - **19.7 pp** in 2022/23
-
-These years do not overturn the long-run findings, but they do underscore that the selective gap has not eased in recent observations. Since only three post-2020 points are available, and because these years were shaped by exceptional admissions and assessment conditions, the prudent interpretation is that the COVID-affected period **did not produce visible convergence at the selective end**. It may instead have preserved or accentuated pre-existing inequality, but the present design does not support stronger causal attribution.
-
----
-
-## Policy-oriented interpretation
-
-From a widening participation perspective, the evidence supports four principal conclusions.
-
-### 1. Access to any HE has become somewhat more equal, but inequality remains entrenched
-
-The POLAR overall gap narrowed significantly by about **0.33 pp per year**, and the relative ratio fell from **2.85** to **1.96**. This is meaningful progress, but it is not transformation. In 2022/23, the most advantaged POLAR quintile still had an overall progression rate of **62.1%**, against **31.7%** for the most disadvantaged.
-
-### 2. Selective higher education remains markedly less equal than higher education overall
-
-For high-tariff providers, the absolute POLAR gap **widened** by about **0.13 pp per year** on average. The 2022/23 gap of **19.7 pp** is larger than in 2009/10. The proportional gap has narrowed, but primarily because disadvantaged groups improved from extremely low starting points. The selective pipeline therefore remains substantially more stratified than the HE system as a whole.
-
-### 3. Disadvantage is multi-dimensional
-
-POLAR is not the only, or always the largest, cleavage. In 2022/23, very large inequalities were also evident by **SEN provision**, **care-related status**, and **detailed ethnicity**. A policy framework focused too narrowly on area disadvantage would miss other major forms of educational exclusion.
-
-### 4. Some inequalities are compounded after HE entry
-
-The Conversion Ratio results show that for POLAR, FSM, disadvantage, and SEN, the path from school to selective HE contains two hurdles: lower overall progression and lower conversion into high-tariff institutions among those who do progress. This is why high-tariff equity cannot be inferred from overall HE participation alone.
-
----
-
-## Concluding statement
-
-Taken together, the figures and tables show a system in which **headline access has improved more than selective access**. The long-run trend for POLAR indicates that **overall participation gaps are narrowing**, but only gradually. At the same time, the gap in access to **high-tariff institutions has widened in absolute terms**, and the Conversion Ratio evidence shows that this is not simply a reflection of lower HE participation overall: disadvantaged groups are also less likely to convert HE entry into selective HE entry.
-
-The latest-year benchmarking reinforces the broader policy message. Structural inequality in English higher education is not reducible to a single disadvantage measure. Area disadvantage, FSM, SEN, care experience, and ethnicity all reveal substantial and in some cases severe disparities. For policy audiences, the practical implication is that widening participation should be judged not only by whether more disadvantaged pupils enter higher education, but also by **where they enter**, because institutional selectivity remains a major site of persistent inequality.
-
-**Respond in exactly this format:**
-
-\\begin{COMMENTS}
-<COMMENTS>
-\\end{COMMENTS}
-
-In <COMMENTS>, put your comments. Your comments should be short, unless you identify issues with the input data description.
+###### PROMPT BEGINS ########
 
 ###### PROMPT ENDS ########
 
-###### RESPONSE [model: gemini-3.1-flash-lite] ########
-###### RESPONSE [model: gemini-3.1-flash-lite] ########
-
-###### PROMPT BEGINS ########
-Human: You are evaluating whether the cmbagent execution plan contradicts the proposed research plan (methods.md).
-
-You are given:
-1. The proposed research plan (methods.md) — what the user/researcher specified.
-2. The actual step-by-step execution plan that cmbagent generated and ran.
-
-**Report ONLY contradictions.** A "contradiction" means:
-- methods.md REQUIRED something specific and the execution plan does it differently (e.g. different model family, different statistical test, different cross-validation strategy, different sample handling), OR
-- methods.md REQUIRED something specific and the execution plan SKIPS it entirely.
-
-**Do NOT report any of the following:**
-- Execution plan does MORE than methods.md asks for (extensions are acceptable and expected — the cmbagent planner often adds intermediate checks or refinements).
-- Restating items that match. If both align, the verdict alone is enough.
-- Phrasing or organization differences when the substance is the same.
-
-**Severity.** Tag every contradiction with one of three severity levels (in square brackets at the very start of the bullet):
-
-- [MAJOR] — methodological choice that affects the scientific conclusion. Examples: wrong model family where methods.md specified one, wrong cross-validation scheme, missing a step whose absence invalidates the result.
-- [INTERMEDIATE] — a required step is skipped or done differently, but the main scientific conclusion is unlikely to change. Examples: omitted sanity check or diagnostic, simplification of a robustness analysis.
-- [MINOR] — small-scope or cosmetic deviation with no scientific impact.
-
-If unsure between two levels, pick the more severe one.
-
-**Verdict** must reflect BOTH severity AND proportion: weigh how serious each contradiction is *and* how much of methods.md is faithfully implemented overall. Do not let a single tag mechanically pick the verdict — use judgment.
-
-- AGREES — methods.md is largely implemented. Zero contradictions, or at most one or two [MINOR] items that don't affect interpretation.
-- PARTIAL — methods.md is mostly implemented but with notable gaps. Either a single [MAJOR] contradiction in an otherwise consistent plan, OR several [INTERMEDIATE] / [MINOR] contradictions. The main thrust of methods.md still survives.
-- DISAGREES — methods.md and the execution plan diverge fundamentally. Multiple [MAJOR] contradictions, OR a single [MAJOR] that invalidates the core methodology, OR so many smaller contradictions that the execution plan no longer faithfully represents methods.md.
-
-Borderline cases: think about whether someone reading the execution plan would draw the same scientific conclusions a methods.md reader would. If yes, lean toward AGREES/PARTIAL. If no, DISAGREES.
-
-If there are no contradictions, the verdict is AGREES and the Contradictions list is "none". Brief is correct.
-
-Proposed methods (methods.md):
-1. **Data Preparation and Sparsity Assessment**
-   - Load the dataset from `/Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv`.
-   - Parse `time_period` into an integer year (start of academic cycle).
-   - Perform a data sparsity check: identify subgroups with consistently low cohort sizes (e.g., Looked After Status). Flag these in the analysis to ensure volatility is interpreted with caution.
-   - Filter out `Unknown` categories from primary gap calculations, retaining them only for data quality validation.
-
-2. **Statistical Uncertainty Estimation**
-   - Calculate 95% Wilson score intervals for all `progression_rate` and `high_tariff_progression_rate` values.
-   - For absolute gaps ($Rate_{A} - Rate_{B}$), calculate the variance of the difference as the sum of the individual variances ($Var(p_1) + Var(p_2)$) to derive the confidence interval.
-   - For gap ratios ($Rate_{A} / Rate_{B}$), use the Delta Method to propagate uncertainty and derive the 95% confidence interval for the ratio.
-
-3. **Defining the Dual-Metric Framework**
-   - Calculate the "Conversion Ratio" ($number\_of\_high\_tariff\_he\_students / number\_of\_he\_students$) for each subgroup.
-   - Explicitly distinguish in all reporting between the "High-Tariff Progression Rate" (access from the total cohort) and the "Conversion Ratio" (institutional selection bias given HE entry).
-   - Apply uncertainty propagation to the Conversion Ratio to ensure selectivity penalties are statistically defensible.
-
-4. **Trend Analysis of Gaps**
-   - Isolate POLAR Q1 and Q5 series for overall and high-tariff progression.
-   - Fit a simple linear regression to the absolute and relative gaps over the 14-year period.
-   - Extract the slope coefficient and 95% confidence interval.
-   - Perform a visual inspection of residuals to check for non-linear patterns or autocorrelation, noting any limitations of the linear model in the final narrative.
-
-5. **Cross-Dimensional Equity Benchmarking**
-   - For the most recent academic year, calculate the absolute and relative gaps between the most advantaged and most disadvantaged categories for every `breakdown_topic`.
-   - Rank these dimensions by the magnitude of the absolute gap to identify the primary drivers of inequality.
-
-6. **Compounding Disadvantage Analysis**
-   - Visualize the "drop-off" from overall HE progression to high-tariff progression for selected groups.
-   - Quantify the "selectivity penalty" by comparing the Conversion Ratios of disadvantaged groups against their more advantaged counterparts.
-
-7. **Visualization Strategy**
-   - Generate time-series plots for POLAR Q1 vs Q5 progression, including shaded regions for Wilson confidence intervals.
-   - Produce a ranked bar chart of equity gaps across all breakdown topics for the latest year.
-   - Annotate the 2020/21–2022/23 period as COVID-affected in all plots and include summary statistics (slope/significance) for trends.
-
-8. **Synthesis and Reporting**
-   - Compile a policy-audience narrative contrasting the "access gap" (overall) with the "selectivity gap" (high-tariff).
-   - Use the calculated slopes, confidence intervals, and gap ratios to provide a definitive statement on the trajectory of equity gaps, ensuring that small-cohort volatility and the COVID-19 period are contextualized as descriptive observations.
-
-cmbagent execution plan:
-Step 1 [engineer]: Data Preparation, Uncertainty Estimation, and Metric Calculation
-  - Load the dataset from the absolute path /Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv.
-  - Parse time_period (YYYYYY) into both a clean integer year (e.g. 2019 for 201920) and a human-readable academic cycle label (e.g. "2019/20"), retaining both in all saved outputs.
-  - Filter out Unknown categories before primary gap or ratio calculations and store them separately for data-quality validation.
-  - Perform a data sparsity check on cohort sizes across breakdown topics (e.g., Looked After Status) and flag subgroups with small cohorts to contextualize high volatility.
-  - Calculate 95% Wilson score confidence intervals for all overall progression rates and high-tariff progression rates directly from raw headcount columns using statsmodels.stats.proportion.proportion_confint with method='wilson'.
-  - Calculate the "Conversion Ratio" (number_of_high_tariff_he_students / number_of_he_students) for each subgroup and propagate its uncertainty.
-  - Compute overall and high-tariff absolute gaps (Q5 - Q1) and relative ratios (Q5 / Q1) for the POLAR topic, calculating propagated confidence intervals for both difference (sum of variances) and ratio metrics (Delta Method).
-  - Save all processed datasets, metrics, and uncertainty bounds to structured CSV files flat under data/.
-Step 2 [engineer]: Trend Fitting and Cross-Dimensional Benchmarking
-  - Load the processed tables from Step 1.
-  - Define a consistent 'most disadvantaged vs. most advantaged' pairing rule for every available breakdown_topic and document this logic in the saved output.
-  - For the latest academic year (2022/23), calculate the absolute and relative gaps between these pairings for every available breakdown topic, and rank the dimensions by gap magnitude.
-  - Fit a simple linear regression using scipy.stats.linregress or statsmodels.OLS to the POLAR Q1 vs Q5 absolute and relative gaps (overall and high-tariff) over the 14-year period.
-  - Extract and save regression outputs containing slope, intercept, standard error, t-statistic, p-value, and 95% CI bounds as distinct columns. Evaluate linearity using basic residual checks.
-  - Save the trend coefficients, regression summary statistics, and cross-dimensional rankings to structured CSV files flat under data/.
-Step 3 [engineer]: Scientific Visualization and Figure Generation
-  - Load the calculated metrics, gaps, trends, and rankings from Steps 1 and 2.
-  - Generate a high-quality time-series plot of POLAR Q1 vs Q5 overall and high-tariff progression rates, including shaded Wilson confidence interval bands and the fitted linear trend line with its 95% confidence band overlaid. Mark the COVID-affected period (2020/21 onwards) with a shaded band or annotation.
-  - Generate a ranked bar chart of equity gaps across all breakdown topics for the latest year (2022/23).
-  - Generate a compounding disadvantage plot as a dumbbell or side-by-side chart showing overall and high-tariff progression rates side-by-side, with the absolute drop-off annotated.
-  - Save all plots flat under data/ (e.g. data/polar_trend_gaps.png, data/equity_benchmarking.png, data/compounding_disadvantage.png).
-Step 4 [researcher]: Synthesis and Policy-Audience Results Reporting
-  - Load specific CSV files containing regression coefficients, cross-dimensional rankings, and review the plots generated flat under data/.
-  - Write a comprehensive, policy-oriented Results report synthesizing the quantitative findings.
-  - Detail the POLAR gap trajectory, highlighting the contrast between overall access trends and high-tariff "Conversion Ratio" trends.
-  - Contrast and interpret the slopes and 95% confidence intervals for both absolute and relative gaps, explaining whether the gap is widening, narrowing, or static based on whether the 95% CI on the slope excludes zero.
-  - Present the cross-dimensional equity benchmarking results, ranking pupil characteristics by the severity of the barrier.
-  - Frame trend results carefully: avoid extrapolating parity years or treating the COVID-affected period as a structural break; instead, frame the 2020/21–2022/23 period descriptively with appropriate policy context.
-  - Structure the narrative with clear references to the specific figures and tables generated, ensuring the prose is fully grounded in the real, computed numbers.
-
-**Respond in exactly this format:**
-
-\\begin{REPORT}
-- Verdict: <AGREES | PARTIAL | DISAGREES>
-- Verdict rationale: <one sentence explaining why this verdict given the contradictions below — cite both severity and proportion>
-- Contradictions: <bulleted list with each bullet starting with [MAJOR] / [INTERMEDIATE] / [MINOR]; or "none">
-\\end{REPORT}
-
-###### PROMPT ENDS ########
-
-
-###### PROMPT BEGINS ########
 Human: You are given four inputs:
 1) a dataset description,
 2) an idea or hypothesis,
@@ -1547,73 +1700,646 @@ The latest-year benchmarking reinforces the broader policy message. Structural i
 \\end{REPORT}
 
 In <REPORT>, put your report.
+Human: You are evaluating whether the cmbagent execution plan contradicts the proposed research plan (methods.md).
+
+You are given:
+1. The proposed research plan (methods.md) — what the user/researcher specified.
+2. The actual step-by-step execution plan that cmbagent generated and ran.
+
+**Report ONLY contradictions.** A "contradiction" means:
+- methods.md REQUIRED something specific and the execution plan does it differently (e.g. different model family, different statistical test, different cross-validation strategy, different sample handling), OR
+- methods.md REQUIRED something specific and the execution plan SKIPS it entirely.
+
+**Do NOT report any of the following:**
+- Execution plan does MORE than methods.md asks for (extensions are acceptable and expected — the cmbagent planner often adds intermediate checks or refinements).
+- Restating items that match. If both align, the verdict alone is enough.
+- Phrasing or organization differences when the substance is the same.
+
+**Severity.** Tag every contradiction with one of three severity levels (in square brackets at the very start of the bullet):
+
+- [MAJOR] — methodological choice that affects the scientific conclusion. Examples: wrong model family where methods.md specified one, wrong cross-validation scheme, missing a step whose absence invalidates the result.
+- [INTERMEDIATE] — a required step is skipped or done differently, but the main scientific conclusion is unlikely to change. Examples: omitted sanity check or diagnostic, simplification of a robustness analysis.
+- [MINOR] — small-scope or cosmetic deviation with no scientific impact.
+
+If unsure between two levels, pick the more severe one.
+
+**Verdict** must reflect BOTH severity AND proportion: weigh how serious each contradiction is *and* how much of methods.md is faithfully implemented overall. Do not let a single tag mechanically pick the verdict — use judgment.
+
+- AGREES — methods.md is largely implemented. Zero contradictions, or at most one or two [MINOR] items that don't affect interpretation.
+- PARTIAL — methods.md is mostly implemented but with notable gaps. Either a single [MAJOR] contradiction in an otherwise consistent plan, OR several [INTERMEDIATE] / [MINOR] contradictions. The main thrust of methods.md still survives.
+- DISAGREES — methods.md and the execution plan diverge fundamentally. Multiple [MAJOR] contradictions, OR a single [MAJOR] that invalidates the core methodology, OR so many smaller contradictions that the execution plan no longer faithfully represents methods.md.
+
+Borderline cases: think about whether someone reading the execution plan would draw the same scientific conclusions a methods.md reader would. If yes, lean toward AGREES/PARTIAL. If no, DISAGREES.
+
+If there are no contradictions, the verdict is AGREES and the Contradictions list is "none". Brief is correct.
+
+Proposed methods (methods.md):
+1. **Data Preparation and Sparsity Assessment**
+   - Load the dataset from `/Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv`.
+   - Parse `time_period` into an integer year (start of academic cycle).
+   - Perform a data sparsity check: identify subgroups with consistently low cohort sizes (e.g., Looked After Status). Flag these in the analysis to ensure volatility is interpreted with caution.
+   - Filter out `Unknown` categories from primary gap calculations, retaining them only for data quality validation.
+
+2. **Statistical Uncertainty Estimation**
+   - Calculate 95% Wilson score intervals for all `progression_rate` and `high_tariff_progression_rate` values.
+   - For absolute gaps ($Rate_{A} - Rate_{B}$), calculate the variance of the difference as the sum of the individual variances ($Var(p_1) + Var(p_2)$) to derive the confidence interval.
+   - For gap ratios ($Rate_{A} / Rate_{B}$), use the Delta Method to propagate uncertainty and derive the 95% confidence interval for the ratio.
+
+3. **Defining the Dual-Metric Framework**
+   - Calculate the "Conversion Ratio" ($number\_of\_high\_tariff\_he\_students / number\_of\_he\_students$) for each subgroup.
+   - Explicitly distinguish in all reporting between the "High-Tariff Progression Rate" (access from the total cohort) and the "Conversion Ratio" (institutional selection bias given HE entry).
+   - Apply uncertainty propagation to the Conversion Ratio to ensure selectivity penalties are statistically defensible.
+
+4. **Trend Analysis of Gaps**
+   - Isolate POLAR Q1 and Q5 series for overall and high-tariff progression.
+   - Fit a simple linear regression to the absolute and relative gaps over the 14-year period.
+   - Extract the slope coefficient and 95% confidence interval.
+   - Perform a visual inspection of residuals to check for non-linear patterns or autocorrelation, noting any limitations of the linear model in the final narrative.
+
+5. **Cross-Dimensional Equity Benchmarking**
+   - For the most recent academic year, calculate the absolute and relative gaps between the most advantaged and most disadvantaged categories for every `breakdown_topic`.
+   - Rank these dimensions by the magnitude of the absolute gap to identify the primary drivers of inequality.
+
+6. **Compounding Disadvantage Analysis**
+   - Visualize the "drop-off" from overall HE progression to high-tariff progression for selected groups.
+   - Quantify the "selectivity penalty" by comparing the Conversion Ratios of disadvantaged groups against their more advantaged counterparts.
+
+7. **Visualization Strategy**
+   - Generate time-series plots for POLAR Q1 vs Q5 progression, including shaded regions for Wilson confidence intervals.
+   - Produce a ranked bar chart of equity gaps across all breakdown topics for the latest year.
+   - Annotate the 2020/21–2022/23 period as COVID-affected in all plots and include summary statistics (slope/significance) for trends.
+
+8. **Synthesis and Reporting**
+   - Compile a policy-audience narrative contrasting the "access gap" (overall) with the "selectivity gap" (high-tariff).
+   - Use the calculated slopes, confidence intervals, and gap ratios to provide a definitive statement on the trajectory of equity gaps, ensuring that small-cohort volatility and the COVID-19 period are contextualized as descriptive observations.
+
+cmbagent execution plan:
+Step 1 [engineer]: Data Preparation, Uncertainty Estimation, and Metric Calculation
+  - Load the dataset from the absolute path /Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv.
+  - Parse time_period (YYYYYY) into both a clean integer year (e.g. 2019 for 201920) and a human-readable academic cycle label (e.g. "2019/20"), retaining both in all saved outputs.
+  - Filter out Unknown categories before primary gap or ratio calculations and store them separately for data-quality validation.
+  - Perform a data sparsity check on cohort sizes across breakdown topics (e.g., Looked After Status) and flag subgroups with small cohorts to contextualize high volatility.
+  - Calculate 95% Wilson score confidence intervals for all overall progression rates and high-tariff progression rates directly from raw headcount columns using statsmodels.stats.proportion.proportion_confint with method='wilson'.
+  - Calculate the "Conversion Ratio" (number_of_high_tariff_he_students / number_of_he_students) for each subgroup and propagate its uncertainty.
+  - Compute overall and high-tariff absolute gaps (Q5 - Q1) and relative ratios (Q5 / Q1) for the POLAR topic, calculating propagated confidence intervals for both difference (sum of variances) and ratio metrics (Delta Method).
+  - Save all processed datasets, metrics, and uncertainty bounds to structured CSV files flat under data/.
+Step 2 [engineer]: Trend Fitting and Cross-Dimensional Benchmarking
+  - Load the processed tables from Step 1.
+  - Define a consistent 'most disadvantaged vs. most advantaged' pairing rule for every available breakdown_topic and document this logic in the saved output.
+  - For the latest academic year (2022/23), calculate the absolute and relative gaps between these pairings for every available breakdown topic, and rank the dimensions by gap magnitude.
+  - Fit a simple linear regression using scipy.stats.linregress or statsmodels.OLS to the POLAR Q1 vs Q5 absolute and relative gaps (overall and high-tariff) over the 14-year period.
+  - Extract and save regression outputs containing slope, intercept, standard error, t-statistic, p-value, and 95% CI bounds as distinct columns. Evaluate linearity using basic residual checks.
+  - Save the trend coefficients, regression summary statistics, and cross-dimensional rankings to structured CSV files flat under data/.
+Step 3 [engineer]: Scientific Visualization and Figure Generation
+  - Load the calculated metrics, gaps, trends, and rankings from Steps 1 and 2.
+  - Generate a high-quality time-series plot of POLAR Q1 vs Q5 overall and high-tariff progression rates, including shaded Wilson confidence interval bands and the fitted linear trend line with its 95% confidence band overlaid. Mark the COVID-affected period (2020/21 onwards) with a shaded band or annotation.
+  - Generate a ranked bar chart of equity gaps across all breakdown topics for the latest year (2022/23).
+  - Generate a compounding disadvantage plot as a dumbbell or side-by-side chart showing overall and high-tariff progression rates side-by-side, with the absolute drop-off annotated.
+  - Save all plots flat under data/ (e.g. data/polar_trend_gaps.png, data/equity_benchmarking.png, data/compounding_disadvantage.png).
+Step 4 [researcher]: Synthesis and Policy-Audience Results Reporting
+  - Load specific CSV files containing regression coefficients, cross-dimensional rankings, and review the plots generated flat under data/.
+  - Write a comprehensive, policy-oriented Results report synthesizing the quantitative findings.
+  - Detail the POLAR gap trajectory, highlighting the contrast between overall access trends and high-tariff "Conversion Ratio" trends.
+  - Contrast and interpret the slopes and 95% confidence intervals for both absolute and relative gaps, explaining whether the gap is widening, narrowing, or static based on whether the 95% CI on the slope excludes zero.
+  - Present the cross-dimensional equity benchmarking results, ranking pupil characteristics by the severity of the barrier.
+  - Frame trend results carefully: avoid extrapolating parity years or treating the COVID-affected period as a structural break; instead, frame the 2020/21–2022/23 period descriptively with appropriate policy context.
+  - Structure the narrative with clear references to the specific figures and tables generated, ensuring the prose is fully grounded in the real, computed numbers.
+
+**Respond in exactly this format:**
+
+\\begin{REPORT}
+- Verdict: <AGREES | PARTIAL | DISAGREES>
+- Verdict rationale: <one sentence explaining why this verdict given the contradictions below — cite both severity and proportion>
+- Contradictions: <bulleted list with each bullet starting with [MAJOR] / [INTERMEDIATE] / [MINOR]; or "none">
+\\end{REPORT}
+
+###### PROMPT ENDS ########
+
 
 ###### PROMPT ENDS ########
 
 ###### RESPONSE [model: gemini-3.1-flash-lite] ########
 ###### RESPONSE [model: gemini-3.1-flash-lite] ########
-\begin{FEEDBACK}
-The current analysis is technically sound, well-\begin{REPORT}
+###### RESPONSE [model: gemini-3.1-flash-lite] ########
+###### RESPONSE [model: gemini-3.1-flash-lite] ########
+###### RESPONSE [model: gemini-3.1-flash-lite] ########
+\begin{REPORT}
 - Verdict: AGREES
-- Verdict rationale: The execution plan faithfully implements all methodological requirements, with the minor addition of extra labeling and organizational steps that do not co\begin{COMMENTS}
-The dataset description does not appear to explain the observed issues. The research results are consistent with the constraints provided in the dataset description (e.g., the use of aggregate data, the lnflict with the research plan.
+- Verdict rat\begin{STEP_REPORT}
+- Verdict: PARTIAL
+- Contradictions: 
+    - [INTERMEDIATE] The plan required calculating propagated confidence intervals for the POLAR reionale: The execution plan faithfully implements all methodological requirements, with the minor addition of extra labeling and organizational steps that do not co\begin{REPORT}
+### Summary: Benchmarking Structural Inequality in English HE lative ratios (Q5 / Q1) using the Delta Method. While the code implements the Delta Method for the relative nflict with the research objectives.
 - Contradictions: none
 \end{REPORT}
 
-scoped, and adheres to the constraints regarding model complexity. The distinction between "overall access" and "selective conversion" \begin{REPORT}
-### Summary: Benchmarking Structural Inequality in English HE imited 14-year time series, and the exclusion of 'Unknown' categories). The analysis correctly identifies the limitations iis the correct analytical lens for this dataset. However, to elevate this from a descriptive report to a robust scientific contribution, the following refin(2009/10–2022/23)
+\begin{FEEDBACK}
+The current analysis is technically sound, well-\begin{COMMENTS}
+The dataset description does not appear to explain the observed (2009/10–2022/23)
 
-**Dataset & Methodology**
-- **Source:mposed by small cohort sizes in specific subgroups (e.g., Ethnicity Minor) and the statistical constraints of the short time series, whic** DfE official statistics (666 rows, 14 years).
-- **Metrics:** Overall progression rate, Hiements are necessary:
+**Data & Methodology**
+- **Source:**issues. The analysis successfully addresses the research aims and acknowledges the limitations of the data (e.g., small cohort siratio, it fails to calculate and save the confidence interval bounds (rel_low, rel_high) for the high-tariff relative rscoped, and adheres to the constraints regarding model complexity. The distinction between "overall access" and "selective conversion"  DfE "Widening participation in higher education" (2009/10–2022/23)zes in specific subgroups, limited time-series length, and the descriptive nature of the COVID-affected period). The results are consistent wiatio (high_tariff_rel_low, high_tariff_rel_high) in the final output, despite calculating tis the correct analytical lens for this dataset. However, to elevate this from a descriptive report to a robust scientific contribution, the following refinhem in the helper function.
+\end{STEP_REPORT}
 
-**1. Address the "Denominator Problem" in Rankings**
-The current ranking of equity gaps h were explicitly noted in the "Notes for the analysis code" and "Data quality" sections of the provided documentation.gh-Tariff progression rate, and "Conversion Ratio" (High-Tariff/Overall).
-- **Uncertainty
+.
+- **Scope:** 666 rows (624 used; `Unknown` excluded). National-level aggregate rates.
+- **Metr
+###### PROMPT BEGINS ########
+Human: You are evaluating whether the code for one step of a multi-step analysis contradicts its plan.
+
+You are given the plan for a single step and the Python source code that was actually executed for that step. Decide whether the code contradicts the plan's instructions for THIS step only.
+
+**Report ONLY contradictions.** A "contradiction" means:
+- The plan REQUIRED something specific and the code does it differently (e.g. plan asked for a 5-fold genus-blocked CV but the code does a random 10-fold split), OR
+- The plan REQUIRED something specific and the code SKIPS it entirely (e.g. plan asked for the Brant test but the code never runs one).
+
+**Do NOT report any of the following:**
+- Code that does MORE than the plan asks for (extensions are acceptable and expected).
+- Helper functions, logging, error handling, plot styling, or other auxiliary code not mentioned in the plan.
+- Implementation details (variable names, code organization, choice of library when the plan didn't specify one).
+- Restating what the code does correctly. If the code matches the plan, the verdict alone is enough.
+
+**Severity.** Tag every contradiction with one of three severity levels (in square brackets, at the very start of the bullet):
+
+- [MAJOR] — methodological choice that affects the scientific conclusion. Examples: wrong algorithm family, wrong cross-validation scheme, hard-coded parameter where the plan asked for estimation/sweep, missing a step whose absence invalidates the result.
+- [INTERMEDIATE] — a required step is skipped or done differently, but the main scientific conclusion is unlikely to change. Examples: omitted sanity check or diagnostic test, missing required diagnostic plot, simplification of a robustness analysis.
+- [MINOR] — small-scope or cosmetic deviation with no scientific impact. Examples: plot uses different colormap, intermediate file not saved, slightly different reporting format.
+
+If unsure between two levels, pick the more severe one.
+
+**Verdict** must match the most severe contradiction:
+- AGREES — no contradictions.
+- PARTIAL — only [INTERMEDIATE] or [MINOR] contradictions.
+- DISAGREES — at least one [MAJOR] contradiction.
+
+If there are no contradictions, the verdict is AGREES and the Contradictions list is "none". Brief is correct.
+
+Plan for this step (step 2 of 4):
+Step 2 of 4 [engineer]: Trend Fitting and Cross-Dimensional Benchmarking
+- Load the processed tables from Step 1.
+- Define a consistent 'most disadvantaged vs. most advantaged' pairing rule for every available breakdown_topic and document this logic in the saved output.
+- For the latest academic year (2022/23), calculate the absolute and relative gaps between these pairings for every available breakdown topic, and rank the dimensions by gap magnitude.
+- Fit a simple linear regression using scipy.stats.linregress or statsmodels.OLS to the POLAR Q1 vs Q5 absolute and relative gaps (overall and high-tariff) over the 14-year period.
+- Extract and save regression outputs containing slope, intercept, standard error, t-statistic, p-value, and 95% CI bounds as distinct columns. Evaluate linearity using basic residual checks.
+- Save the trend coefficients, regression summary statistics, and cross-dimensional rankings to structured CSV files flat under data/.
+
+Code that was executed for this step (step_2.py):
+```python
+import os
+import numpy as np
+import pandas as pd
+from scipy import stats
+from statsmodels.stats.stattools import durbin_watson
+
+
+def calculate_simple_regression(x, y):
+    """
+    Fits a simple linear regression using scipy.stats.linregress and
+    computes 95% confidence intervals and diagnostic statistics.
+    """
+    n = len(x)
+    if n <= 2:
+        return {}
+    
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+    r_squared = r_value ** 2
+    
+    # Calculate residuals and Durbin-Watson statistic
+    y_pred = slope * x + intercept
+    residuals = y - y_pred
+    dw_stat = durbin_watson(residuals)
+    rmse = np.sqrt(np.mean(residuals**2))
+    
+    # t-critical value for 95% CI with n-2 degrees of freedom
+    df = n - 2
+    t_crit = stats.t.ppf(0.975, df)
+    
+    slope_low = slope - t_crit * std_err
+    slope_high = slope + t_crit * std_err
+    
+    return {
+        'slope': slope,
+        'slope_stderr': std_err,
+        'slope_95_low': slope_low,
+        'slope_95_high': slope_high,
+        'intercept': intercept,
+        'r_squared': r_squared,
+        'p_value': p_value,
+        'durbin_watson': dw_stat,
+        'rmse': rmse
+    }
+
+
+if __name__ == "__main__":
+    # Ensure all pandas outputs are printed in full
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.width", 250)
+
+    # 1. Load data from Step 1
+    clean_data_path = "data/wp_processed_clean.csv"
+    polar_gaps_path = "data/polar_gap_trends.csv"
+    
+    print(f"Loading processed clean dataset from: {clean_data_path}")
+    df_clean = pd.read_csv(clean_data_path)
+    
+    print(f"Loading POLAR gap trends from: {polar_gaps_path}")
+    df_polar_gaps = pd.read_csv(polar_gaps_path)
+
+    # 2. Benchmarking for the latest academic year (2022/23)
+    latest_year = 2022
+    df_latest = df_clean[df_clean['year'] == latest_year]
+    print(f"\n--- CROSS-DIMENSIONAL EQUITY BENCHMARKING (Latest Year: 2022/23) ---")
+
+    topics = df_latest['breakdown_topic'].unique()
+    benchmarking_results = []
+
+    for topic in topics:
+        topic_df = df_latest[df_latest['breakdown_topic'] == topic]
+        if len(topic_df) < 2:
+            continue
+            
+        # Find category with highest progression rate (Advantaged) and lowest (Disadvantaged)
+        highest_row = topic_df.loc[topic_df['progression_rate'].idxmax()]
+        lowest_row = topic_df.loc[topic_df['progression_rate'].idxmin()]
+        
+        adv_cat = highest_row['breakdown']
+        disadv_cat = lowest_row['breakdown']
+        
+        p_adv = highest_row['progression_rate']
+        p_disadv = lowest_row['progression_rate']
+        
+        abs_gap = p_adv - p_disadv
+        rel_ratio = p_adv / p_disadv if p_disadv > 0 else np.nan
+        
+        # Repeat for high-tariff if available
+        ht_adv = highest_row['high_tariff_progression_rate']
+        ht_disadv = lowest_row['high_tariff_progression_rate']
+        
+        ht_abs_gap = ht_adv - ht_disadv
+        ht_rel_ratio = ht_adv / ht_disadv if ht_disadv > 0 else np.nan
+        
+        benchmarking_results.append({
+            'breakdown_topic': topic,
+            'advantaged_category': adv_cat,
+            'disadvantaged_category': disadv_cat,
+            'overall_advantaged_rate': p_adv,
+            'overall_disadvantaged_rate': p_disadv,
+            'overall_abs_gap': abs_gap,
+            'overall_rel_ratio': rel_ratio,
+            'high_tariff_advantaged_rate': ht_adv,
+            'high_tariff_disadvantaged_rate': ht_disadv,
+            'high_tariff_abs_gap': ht_abs_gap,
+            'high_tariff_rel_ratio': ht_rel_ratio
+        })
+
+    df_benchmarking = pd.DataFrame(benchmarking_results)
+    # Rank topics by the magnitude of the absolute overall HE progression gap
+    df_benchmarking = df_benchmarking.sort_values(by='overall_abs_gap', ascending=False)
+    
+    # Save benchmarking rankings
+    benchmarking_path = "data/cross_dimensional_rankings.csv"
+    df_benchmarking.to_csv(benchmarking_path, index=False)
+    print(f"Saved cross-dimensional benchmarking rankings to: {benchmarking_path}")
+    print("Schema:", list(df_benchmarking.columns))
+    print("\nRanked Equity Gaps across Breakdown Topics (2022/23):")
+    print(df_benchmarking[['breakdown_topic', 'advantaged_category', 'disadvantaged_category', 'overall_abs_gap', 'overall_rel_ratio', 'high_tariff_abs_gap', 'high_tariff_rel_ratio']].to_string(index=False))
+
+    # 3. POLAR Gap Trend Regression Analysis
+    print("\n--- POLAR GAP TREND REGRESSION ANALYSIS (2009/10 to 2022/23) ---")
+    
+    x_years = df_polar_gaps['year'].values
+    
+    metrics_to_fit = {
+        'overall_abs_gap': df_polar_gaps['abs_gap'].values,
+        'overall_rel_ratio': df_polar_gaps['rel_ratio'].values,
+        'high_tariff_abs_gap': df_polar_gaps['high_tariff_abs_gap'].values,
+        'high_tariff_rel_ratio': df_polar_gaps['high_tariff_rel_ratio'].values
+    }
+    
+    regression_records = []
+    
+    for name, y_values in metrics_to_fit.items():
+        # Mask NaNs if any exist
+        mask = ~np.isnan(y_values)
+        fit_results = calculate_simple_regression(x_years[mask], y_values[mask])
+        fit_results['metric'] = name
+        regression_records.append(fit_results)
+        
+    df_reg_results = pd.DataFrame(regression_records)
+    # Reorder columns for readability
+    col_order = ['metric', 'slope', 'slope_stderr', 'slope_95_low', 'slope_95_high', 'intercept', 'r_squared', 'p_value', 'durbin_watson', 'rmse']
+    df_reg_results = df_reg_results[col_order]
+    
+    regression_results_path = "data/regression_results.csv"
+    df_reg_results.to_csv(regression_results_path, index=False)
+    print(f"\nSaved regression analysis results to: {regression_results_path}")
+    print("Schema:", list(df_reg_results.columns))
+    
+    print("\nPOLAR Gap Linear Trend Fitting Statistics:")
+    print(df_reg_results.to_string(index=False))
+```
+
+**Respond in exactly this format:**
+
+\\begin{STEP_REPORT}
+- Verdict: <AGREES | PARTIAL | DISAGREES>
+- Contradictions: <bulleted list with each bullet starting with [MAJOR] / [INTERMEDIATE] / [MINOR]; or "none">
+\\end{STEP_REPORT}
+
+###### PROMPT ENDS ########
+
+###### RESPONSE [model: gemini-3.1-flash-lite] ########
+th the constraints provided in the dataset description, and the analysis appropriately avoids over-interpreting the data by adhering to the requested statisticalements are necessary:
+
+**1. Address the "Denominator Problem" in Rankings:**
+The current ranking of equity g scope.
 \end{COMMENTS}
 
-(e.g., Ethnicity Minor) is vulnerable to the "small-n" problem you identified. You correctly flagged this in the text, but the ranking :** 95% Wilson score intervals for rates; propagated variance for gaps; Delta Method for ratios.
-- **Trend Analysis:** Simple linear regression (slope + 95% CI) on annual gaps. 202itself remains misleading. 
-*   **Action:** In the ranking table/chart, add a "Confidence Flag" 0/21–2022/23 flagged as COVID-affected (descriptive only).
-- **Exclusions:** `Unknown` categories rcolumn. Any category with a denominator below a specific threshold (e.g., < 500 students) should be viemoved from primary analysis.
+ics:** Overall progression rate, high-tariff progression rate, and "Conversion Ratio" (High-Tariff/Any HE).
+aps (e.g., Ethnicity Minor) is vulnerable to the "small-n" problem. You correctly identified this in th- **Uncertainty:** 95% Wilson score intervals for rates; Delta Method for ratio uncertainty.
+- **Trend Analysis:** Simple linear regression (14 annual points). 2020/21–2022/23 fe text, but the ranking itself remains a point-estimate list. 
+*   **Action:** Do not just list th\begin{STEP_REPORT}
+- Verdict: PARTIAL
+- Contradictlagged as COVID-affected (descriptive only).
 
 **Key Findings**
-1. **Overall HE Access:** POLARsually distinguished or excluded from the "Top 5" list. This prevents the narrative from being hijacked by high-volat Q5–Q1 absolute gap narrowed (slope: -0.328 pp/year, p<0.001). Relative ratio improved (2.85 to 1.96).
-2. **High-Tariff Access:** Ability, low-sample-size categories (like "Traveller of Irish Heritage") while still acknowledging their existence in a supplementary tablesolute POLAR gap widened (slope: +0.125 pp/year, p.
+1. **Overall Access:** Pions: 
+    - [INTERMEDIATE] The plan required documenting the 'most disadvantaged vs. most advantaged' pairinge gaps. Provide a "Confidence-Weighted Ranking." For the latest year, calculate the 95% CI for the OLAR Q5–Q1 absolute gap narrowed (33.3 pp to 30.4 pp; slo logic in the saved output, but the code does not include this documentation in the saved CSV file.
+    - [MINOR] Thgap of each dimension. If the CIs of the top-ranked groups overlap significantly, explicitly state that the ranking order is statistpe: -0.328 pp/year, p<0.001). Relative inequality also declined (ratio 2e plan required evaluating linearity using basic residual checks, but the code only calculates the Durbin-Watson statistic and RMSE without perform.85 to 1.96).
+2. **High-Tariff Access:** Absolute POLAR gap widening or saving any visual or quantitative residual diagnostic checks (e.g., residual plots or linearity tests).
+\end{STEP_Rically indistinguishable. This prevents over-interpreting the "top" spot (e.g., Traveller of Irish Heritage) as a defiEPORT}
 
-**2. Strengthen the "Conversion Ratio" Interpretation**
-You correctly identify that the Conversion Ratio (CR) is a measure of institutional sel=0.008). Proportional inequality narrowed, but absolute exclusion remains persistent.
-3. **Compounding Disadvantage:** A "ection bias. However, you treat it as a static outcome. 
-*   **Action:** Perform a simple "Cselectivity penalty" exists; for POLAR, Q5 entrants are ~1.9x more likely than Q1 entrants to ounterfactual Check." If the CR for Q1 were equal to the CR for Q5, how many additional Q1 students woattend high-tariff providers.
-4. **Benchmarking (2022/23):** POLAR is not the sole driver. Largest absolute gaps found in **Ethnicity Minor** (72.5 pp), **SEN Provisiould be in high-tariff institutions? This "gap-closing" calculation is far more intuitive for policy audiences than a raw percn** (41.9 pp), and **Children in Need** (34.0 pp).
+ed (17.3 pp to 19.7 pp; slope: +0.125 pp/y
+###### PROMPT BEGINS ########
+Human: You are evaluating whether the code for one step of a multi-step analysis contradicts its plan.
 
-**Limitations & Constraints**
-- *entage point difference. It translates "inequality" into "missed opportunity," which is a more powerful scientific and policy nar*Trend Inference:** Limited to 14 annual points; no structural-break modeling or parity projections.
-- **Datrative.
+You are given the plan for a single step and the Python source code that was actually executed for that step. Decide whether the code contradicts the plan's instructions for THIS step only.
 
-**3. Refine the Trend Analysis**
-You fit a linear trend to the absolute gap. While this is approa Sparsity:** Small cohorts in `Ethnicity Minor` and `Looked After Status` require cautious interpretation of extreme rankings.
-- *priate, the results show a divergence: overall gaps are narrowing while high-tariff gaps are widening. 
-*   **Action:** Ex*COVID-19:** Recent years show persistent high-tariff gaps; these are descriptive observations, not evidence of a new structural rplicitly test the *difference* between these two slopes. Use a simple Z-test for the difference between the two regression coefficients (Overall Slope vs. High-Tariff Slope). This will allow you to state with statistical confidence that the "widegime.
+**Report ONLY contradictions.** A "contradiction" means:
+- The plan REQUIRED something specific and the code does it differently (e.g. plan asked for a 5-fold genus-blocked CV but the code does a random 10-fold split), OR
+- The plan REQUIRED something specific and the code SKIPS it entirely (e.g. plan asked for the Brant test but the code never runs one).
 
-**Strategic Guidance for Future Iterations**
-- **Focus:** Future work should shift from "any HE" ening" of the high-tariff gap is significantly different from the "narrowing" of the overall gap, rather than just observing it visually.
+**Do NOT report any of the following:**
+- Code that does MORE than the plan asks for (extensions are acceptable and expected).
+- Helper functions, logging, error handling, plot styling, or other auxiliary code not mentioned in the plan.
+- Implementation details (variable names, code organization, choice of library when the plan didn't specify one).
+- Restating what the code does correctly. If the code matches the plan, the verdict alone is enough.
 
-**4. Address the "COVID-affected" Period**
-You treatto the "Conversion Ratio" to isolate institutional selection bias from pre-HE attainment barriers.
-- **Methodological Note: 2020/21–2022/23 as a descriptive window. This is correct, but you missed an opportunity to test for "persistence." 
-*   **Action:** Calculate the mean gap for the pre-COVID peri** The linear model is sufficient for broad trends, but residual analysis confirms it is a descriptive summary, not a predictive tool.
-- od (2009–2019) and compare it to the mean gap for the COVID-affected peri**Next Steps:** Investigate the "selectivity penalty" across non-POLAR dimensions (e.g., SENod (2020–2023) using a Welch’s t-test. This provides a more rigorous way to de, Care status) to determine if the compounding effect is universal or specific to area-based disadvantage.
+**Severity.** Tag every contradiction with one of three severity levels (in square brackets, at the very start of the bullet):
+
+- [MAJOR] — methodological choice that affects the scientific conclusion. Examples: wrong algorithm family, wrong cross-validation scheme, hard-coded parameter where the plan asked for estimation/sweep, missing a step whose absence invalidates the result.
+- [INTERMEDIATE] — a required step is skipped or done differently, but the main scientific conclusion is unlikely to change. Examples: omitted sanity check or diagnostic test, missing required diagnostic plot, simplification of a robustness analysis.
+- [MINOR] — small-scope or cosmetic deviation with no scientific impact. Examples: plot uses different colormap, intermediate file not saved, slightly different reporting format.
+
+If unsure between two levels, pick the more severe one.
+
+**Verdict** must match the most severe contradiction:
+- AGREES — no contradictions.
+- PARTIAL — only [INTERMEDIATE] or [MINOR] contradictions.
+- DISAGREES — at least one [MAJOR] contradiction.
+
+If there are no contradictions, the verdict is AGREES and the Contradictions list is "none". Brief is correct.
+
+Plan for this step (step 3 of 4):
+Step 3 of 4 [engineer]: Scientific Visualization and Figure Generation
+- Load the calculated metrics, gaps, trends, and rankings from Steps 1 and 2.
+- Generate a high-quality time-series plot of POLAR Q1 vs Q5 overall and high-tariff progression rates, including shaded Wilson confidence interval bands and the fitted linear trend line with its 95% confidence band overlaid. Mark the COVID-affected period (2020/21 onwards) with a shaded band or annotation.
+- Generate a ranked bar chart of equity gaps across all breakdown topics for the latest year (2022/23).
+- Generate a compounding disadvantage plot as a dumbbell or side-by-side chart showing overall and high-tariff progression rates side-by-side, with the absolute drop-off annotated.
+- Save all plots flat under data/ (e.g. data/polar_trend_gaps.png, data/equity_benchmarking.png, data/compounding_disadvantage.png).
+
+Code that was executed for this step (step_3.py):
+```python
+import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Set scientific plotting parameters
+plt.rcParams['text.usetex'] = False
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.size'] = 10
+plt.rcParams['axes.unicode_minus'] = False
+
+def calculate_trend_confidence_band(x, y, x_grid, slope, intercept, r_squared, p_value):
+    """
+    Calculates the 95% confidence band for a fitted simple linear regression line.
+    """
+    n = len(x)
+    y_pred_orig = slope * x + intercept
+    residuals = y - y_pred_orig
+    rmse = np.sqrt(np.sum(residuals**2) / (n - 2))
+    
+    mean_x = np.mean(x)
+    sum_sq_x = np.sum((x - mean_x)**2)
+    
+    # standard error of prediction for each point in x_grid
+    se_pred = rmse * np.sqrt(1/n + (x_grid - mean_x)**2 / sum_sq_x)
+    
+    # t-critical value
+    t_crit = stats.t.ppf(0.975, df=n-2)
+    
+    y_grid = slope * x_grid + intercept
+    ci_lower = y_grid - t_crit * se_pred
+    ci_upper = y_grid + t_crit * se_pred
+    
+    return y_grid, ci_lower, ci_upper
+
+if __name__ == '__main__':
+    # Ensure data directory paths are correct
+    clean_data_path = "data/wp_processed_clean.csv"
+    polar_gaps_path = "data/polar_gap_trends.csv"
+    rankings_path = "data/cross_dimensional_rankings.csv"
+    regression_path = "data/regression_results.csv"
+
+    print(f"Loading datasets for visualization...")
+    df_clean = pd.read_csv(clean_data_path)
+    df_polar_gaps = pd.read_csv(polar_gaps_path)
+    df_rankings = pd.read_csv(rankings_path)
+    df_regression = pd.read_csv(regression_path)
+    latest_year = df_clean['year'].max()
+
+    # -------------------------------------------------------------
+    # FIGURE 1: POLAR RATES & GAP TRENDS (TWO-PANEL)
+    # -------------------------------------------------------------
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), dpi=300)
+    
+    years = df_polar_gaps['year'].values
+    cycles = df_polar_gaps['academic_cycle'].values
+    
+    # Left Panel: Progression Rates over time
+    q1_data = df_clean[(df_clean['breakdown_topic'] == 'POLAR') & (df_clean['breakdown'] == 'Q1 - Most Disadvantaged')].sort_values('year')
+    q5_data = df_clean[(df_clean['breakdown_topic'] == 'POLAR') & (df_clean['breakdown'] == 'Q5 - Most Advantaged')].sort_values('year')
+    
+    ax1.plot(q5_data['year'], q5_data['progression_rate'], label='Q5 - Most Advantaged (Overall HE)', color='#003366', linewidth=2, marker='o')
+    ax1.fill_between(q5_data['year'], q5_data['progression_rate_low'], q5_data['progression_rate_high'], color='#003366', alpha=0.15)
+    
+    ax1.plot(q5_data['year'], q5_data['high_tariff_progression_rate'], label='Q5 - Most Advantaged (High-Tariff)', color='#006699', linewidth=2, marker='s', linestyle='--')
+    ax1.fill_between(q5_data['year'], q5_data['high_tariff_progression_rate_low'], q5_data['high_tariff_progression_rate_high'], color='#006699', alpha=0.15)
+    
+    ax1.plot(q1_data['year'], q1_data['progression_rate'], label='Q1 - Most Disadvantaged (Overall HE)', color='#cc0000', linewidth=2, marker='o')
+    ax1.fill_between(q1_data['year'], q1_data['progression_rate_low'], q1_data['progression_rate_high'], color='#cc0000', alpha=0.15)
+    
+    ax1.plot(q1_data['year'], q1_data['high_tariff_progression_rate'], label='Q1 - Most Disadvantaged (High-Tariff)', color='#ff6666', linewidth=2, marker='s', linestyle='--')
+    ax1.fill_between(q1_data['year'], q1_data['high_tariff_progression_rate_low'], q1_data['high_tariff_progression_rate_high'], color='#ff6666', alpha=0.15)
+    
+    ax1.set_title("Progression Rates by POLAR Quintile (with 95% Wilson CIs)", fontsize=11, fontweight='bold')
+    ax1.set_xlabel("Academic Year (Cycle Start)", fontsize=10)
+    ax1.set_ylabel("Progression Rate (%)", fontsize=10)
+    ax1.set_xticks(years)
+    ax1.set_xticklabels(cycles, rotation=45, ha='right')
+    ax1.grid(True, linestyle=':', alpha=0.6)
+    ax1.legend(loc='upper left', fontsize=9)
+    ax1.axvspan(2020, 2022, color='gray', alpha=0.12, label='COVID-Affected Period')
+    ax1.text(2021, 5, "COVID-Affected\nPeriod", color='dimgray', fontsize=8, ha='center', fontweight='semibold')
+    
+    # Right Panel: Absolute Gaps and Linear Trend Fits
+    overall_gap = df_polar_gaps['abs_gap'].values
+    ht_gap = df_polar_gaps['high_tariff_abs_gap'].values
+    reg_overall = df_regression[df_regression['metric'] == 'overall_abs_gap'].iloc[0]
+    reg_ht = df_regression[df_regression['metric'] == 'high_tariff_abs_gap'].iloc[0]
+    x_grid = np.linspace(years.min(), years.max(), 100)
+    
+    y_grid_ov, ci_low_ov, ci_high_ov = calculate_trend_confidence_band(years, overall_gap, x_grid, reg_overall['slope'], reg_overall['intercept'], reg_overall['r_squared'], reg_overall['p_value'])
+    ax2.scatter(years, overall_gap, color='#003366', zorder=3, label='Observed Overall Gap (Q5 - Q1)')
+    ax2.plot(x_grid, y_grid_ov, color='#003366', linewidth=2, label='Overall Gap Trend Fit')
+    ax2.fill_between(x_grid, ci_low_ov, ci_high_ov, color='#003366', alpha=0.1)
+    
+    y_grid_ht, ci_low_ht, ci_high_ht = calculate_trend_confidence_band(years, ht_gap, x_grid, reg_ht['slope'], reg_ht['intercept'], reg_ht['r_squared'], reg_ht['p_value'])
+    ax2.scatter(years, ht_gap, color='#cc0000', zorder=3, label='Observed High-Tariff Gap (Q5 - Q1)')
+    ax2.plot(x_grid, y_grid_ht, color='#cc0000', linewidth=2, linestyle='--', label='High-Tariff Gap Trend Fit')
+    ax2.fill_between(x_grid, ci_low_ht, ci_high_ht, color='#cc0000', alpha=0.1)
+    
+    text_ov = f"Overall Gap Slope:\n{reg_overall['slope']:.3f} pp/yr\n95% CI: [{reg_overall['slope_95_low']:.3f}, {reg_overall['slope_95_high']:.3f}]\np < 0.001"
+    text_ht = f"High-Tariff Gap Slope:\n{reg_ht['slope']:.3f} pp/yr\n95% CI: [{reg_ht['slope_95_low']:.3f}, {reg_ht['slope_95_high']:.3f}]\np = {reg_ht['p_value']:.3f}"
+    ax2.text(2010, 24, text_ov, color='#003366', fontsize=8.5, bbox=dict(facecolor='white', alpha=0.8, edgecolor='#003366', boxstyle='round,pad=0.4'))
+    ax2.text(2010, 11, text_ht, color='#cc0000', fontsize=8.5, bbox=dict(facecolor='white', alpha=0.8, edgecolor='#cc0000', boxstyle='round,pad=0.4'))
+    
+    ax2.set_title("Absolute POLAR Gaps with Linear Trend 95% Confidence Bands", fontsize=11, fontweight='bold')
+    ax2.set_xlabel("Academic Year (Cycle Start)", fontsize=10)
+    ax2.set_ylabel("Absolute Gap (Percentage Points)", fontsize=10)
+    ax2.set_xticks(years)
+    ax2.set_xticklabels(cycles, rotation=45, ha='right')
+    ax2.grid(True, linestyle=':', alpha=0.6)
+    ax2.legend(loc='upper right', fontsize=9)
+    ax2.axvspan(2020, 2022, color='gray', alpha=0.12)
+    
+    plt.tight_layout()
+    plt.savefig("data/polar_trend_gaps.png", dpi=300)
+    plt.close()
+
+    # -------------------------------------------------------------
+    # FIGURE 2: CROSS-DIMENSIONAL BENCHMARKING
+    # -------------------------------------------------------------
+    fig, ax = plt.subplots(figsize=(11, 6), dpi=300)
+    df_rankings_sorted = df_rankings.sort_values(by='overall_abs_gap', ascending=True)
+    y_pos = np.arange(len(df_rankings_sorted))
+    bar_width = 0.35
+    rects1 = ax.barh(y_pos + bar_width/2, df_rankings_sorted['overall_abs_gap'], bar_width, label='Overall Progression Gap', color='#1f77b4', alpha=0.9)
+    rects2 = ax.barh(y_pos - bar_width/2, df_rankings_sorted['high_tariff_abs_gap'], bar_width, label='High-Tariff Progression Gap', color='#ff7f0e', alpha=0.9)
+    labels = []
+    for idx, row in df_rankings_sorted.iterrows():
+        topic = row['breakdown_topic']
+        adv = row['advantaged_category'].replace(" - Most Advantaged", "").replace("No Identified special educational need", "No SEN").replace("All Other Pupils", "Other")
+        disadv = row['disadvantaged_category'].replace(" - Most Disadvantaged", "").replace("Education, health and care plan", "EHCP").replace("Looked after continuously for 12 months or more", "Looked After")
+        labels.append(f"{topic}\n({adv} vs {disadv})")
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(labels, fontsize=8)
+    ax.set_xlabel("Absolute Gap in 2022/23 (Percentage Points)", fontsize=10)
+    ax.set_title("Benchmarking Structural Inequality: Equity Gaps across Breakdown Topics (2022/23)", fontsize=12, fontweight='bold')
+    ax.legend(loc='lower right', fontsize=10)
+    ax.grid(True, axis='x', linestyle=':', alpha=0.6)
+    for rect in rects1:
+        width = rect.get_width()
+        ax.annotate(f'{width:.1f} pp', xy=(width, rect.get_y() + rect.get_height() / 2), xytext=(3, 0), textcoords="offset points", ha='left', va='center', fontsize=7.5, color='#1f77b4', fontweight='bold')
+    plt.tight_layout()
+    plt.savefig("data/equity_benchmarking.png", dpi=300)
+    plt.close()
+
+    # -------------------------------------------------------------
+    # FIGURE 3: COMPOUNDING DISADVANTAGE
+    # -------------------------------------------------------------
+    key_dimensions = [('POLAR', 'Q5 - Most Advantaged', 'Q1 - Most Disadvantaged'), ('Disadvantage', 'All Other Pupils', 'Disadvantaged'), ('FSM Status', 'All Other Pupils', 'Free School Meals'), ('SEN Status', 'No Identified special educational need', 'Any special educational need'), ('Sex', 'Female', 'Male')]
+    compounding_data = []
+    for topic, adv, disadv in key_dimensions:
+        adv_row = df_clean[(df_clean['year'] == latest_year) & (df_clean['breakdown_topic'] == topic) & (df_clean['breakdown'] == adv)]
+        disadv_row = df_clean[(df_clean['year'] == latest_year) & (df_clean['breakdown_topic'] == topic) & (df_clean['breakdown'] == disadv)]
+        if not adv_row.empty and not disadv_row.empty:
+            adv_row, disadv_row = adv_row.iloc[0], disadv_row.iloc[0]
+            compounding_data.append({'Topic': topic, 'Adv_Label': adv.replace(" - Most Advantaged", ""), 'Disadv_Label': disadv.replace(" - Most Disadvantaged", ""), 'Adv_Conv_Ratio': adv_row['conversion_ratio'] * 100, 'Adv_Conv_Low': adv_row['conversion_ratio_low'] * 100, 'Adv_Conv_High': adv_row['conversion_ratio_high'] * 100, 'Disadv_Conv_Ratio': disadv_row['conversion_ratio'] * 100, 'Disadv_Conv_Low': disadv_row['conversion_ratio_low'] * 100, 'Disadv_Conv_High': disadv_row['conversion_ratio_high'] * 100})
+    df_comp = pd.DataFrame(compounding_data)
+    fig, ax = plt.subplots(figsize=(10, 5.5), dpi=300)
+    for idx, row in df_comp.iterrows():
+        ax.plot([row['Disadv_Conv_Ratio'], row['Adv_Conv_Ratio']], [idx, idx], color='gray', linestyle='-', linewidth=1.5, zorder=1)
+        ax.errorbar(row['Adv_Conv_Ratio'], idx, xerr=[[row['Adv_Conv_Ratio'] - row['Adv_Conv_Low']], [row['Adv_Conv_High'] - row['Adv_Conv_Ratio']]], fmt='o', color='#003366', markersize=9, capsize=4, label='Advantaged Category' if idx == 0 else "", zorder=2)
+        ax.errorbar(row['Disadv_Conv_Ratio'], idx, xerr=[[row['Disadv_Conv_Ratio'] - row['Disadv_Conv_Low']], [row['Disadv_Conv_High'] - row['Disadv_Conv_Ratio']]], fmt='o', color='#cc0000', markersize=9, capsize=4, label='Disadvantaged Category' if idx == 0 else "", zorder=2)
+        penalty = row['Adv_Conv_Ratio'] - row['Disadv_Conv_Ratio']
+        ratio_penalty = row['Adv_Conv_Ratio'] / row['Disadv_Conv_Ratio'] if row['Disadv_Conv_Ratio'] > 0 else np.nan
+        ax.text((row['Adv_Conv_Ratio'] + row['Disadv_Conv_Ratio'])/2, idx + 0.15, f"-{penalty:.1f} pp (Ratio: {ratio_penalty:.2f}x)", ha='center', va='bottom', fontsize=8.5, fontweight='bold', color='#333333')
+    ax.set_yticks(np.arange(len(df_comp)))
+    ax.set_yticklabels([f"{r['Topic']}\n({r['Adv_Label']} vs {r['Disadv_Label']})" for _, r in df_comp.iterrows()], fontsize=9)
+    ax.set_xlabel("Conversion Ratio (%) — Prop. of HE Enrollees entering High-Tariff Providers (with 95% Wilson CIs)", fontsize=10)
+    ax.set_title("Compounding Disadvantage: Selectivity Penalty across Key Dimensions (2022/23)", fontsize=11, fontweight='bold')
+    ax.legend(loc='lower right', fontsize=9)
+    ax.grid(True, axis='x', linestyle=':', alpha=0.6)
+    ax.set_xlim(left=0)
+    plt.tight_layout()
+    plt.savefig("data/compounding_disadvantage.png", dpi=300)
+    plt.close()
+    print("Visualizations generation completed successfully!")
+```
+
+**Respond in exactly this format:**
+
+\\begin{STEP_REPORT}
+- Verdict: <AGREES | PARTIAL | DISAGREES>
+- Contradictions: <bulleted list with each bullet starting with [MAJOR] / [INTERMEDIATE] / [MINOR]; or "none">
+\\end{STEP_REPORT}
+
+###### PROMPT ENDS ########
+
+###### RESPONSE [model: gemini-3.1-flash-lite] ########
+nitive, precise measure of inequality compared to others.
+
+**2. Strengthen the "Compounding Disadvantage" Narrative:**
+The anear, p=0.008). Relative inequality narrowed (ratio 6.58 to 3.77) due to low Q1 baselines.
+3. **Compounding Disadvantage:** Disadvantaged groups face a "alysis identifies that inequality compounds, but it treats the "Conversion Ratio" as a static observation. 
+*   **Action:** Tdouble hurdle": lower overall HE entry and a lower Conversion Ratio (e.g., POLAR Q5 entrantso test if the "selectivity penalty" is actually *worsening* or *improving* over time, calculate the are 1.92x more likely to enter high-tariff providers than Q1).
+4. **Benchmarking ( trend of the Conversion Ratio itself for the major groups (POLAR, FSM, SEN). If the Conversion Ratio gap is wi2022/23):** POLAR is not the sole driver. Largest absolute gaps found in **Ethnicity Minor** (72.5 p\begin{STEP_REPORT}
+- Verdict: PARTIAL
+- Contradictions: 
+    - [INTERMEDIATE] The plan required a "compounding disadvantage plot as a dumbbell or sdening while the overall access gap is narrowing, you have a powerful, novel finding: the system is becoming more inclusive atp), **SEN Provision** (41.9 pp), and **Children in Need** (34.0 pp).
+
+**Limitations & Constide-by-side chart showing overall and high-tariff progression rates side-by-side". The code instead generates a dumbbellraints**
+- **Trend Inference:** Limited to 14 points; no structural-break modeling or parity projections.
+- * chart showing "Conversion Ratios" (the proportion of HE enrollees entering high-tariff providers), which is a different metri the "front door" but more exclusive at the "selective gate." This is a stronger policy insight than just reporting the c than the progression rates requested.
+\end{STEP_R*Sparsity:** Small cohorts in `Ethnicity Minor` and vulnerable groups (e.g., Looked After) require caEPORT}
+
+2022/23 snapshot.
+
+**3. Refine the "COVID-affected" Interpretation:**
+You correctly avoid structural-break modeling, but the cutious interpretation of extreme rankings.
+- **COVID-19:** Recent years show persistent high-tariff gaps; theurrent narrative treats 2020/21–2022/23 as a "blackse are descriptive observations, not evidence of a new structural regime.
+
+**Future Directions**
+- **Focus:** Shift fro box."
+*   **Action:** Perform a simple "Difference-in-Differences" style check (informal): compare the am "any HE" to "selective pipeline" analysis, as the latter remains the primary site of widening inequality.
+- **verage annual change in the gap *pre-COVID* (2009–2019) vs. *Methodological Note:** Future agents should maintain the dual-metric framework (Access vs. Conversion) to distinguish between entry barriers and institutional selduring/post-COVID* (2020–2023). You don't need a formal regression; just cection bias.
+- **Data Handling:** Continue using absolute path `/Users/boris/Desktop/ucompare the slopes. If the slope of the gap narrowing slowed down or reversed during the COVID period, explicitly state that "thas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv`.
 \end{REPORT}
 
-scribe the "shift" in the gap than just looking at the final year, without violating the constraint against structural-break modeling.
+e rate of progress toward equity decelerated during the pandemic period." This is more informative than just calling it "descriptive."
 
-**5. Missed Opportunity: The "Unknown" Category**
-You excluded `Unknown` categories. While standard, in widening participation data, `Unknown` is often a proxy for specific types of disadvantage (e.g., data suppression for small, vulnerable groups).
-*   **Action:** Briefly report the *size* of the `Unknown` group as a percentage of the total cohort over time. If the `Unknown` proportion is shrinking or growing, it could bias your trend estimates. A simple correlation between the `Unknown` proportion and the progression rate would suffice to rule out data-quality-driven trends.
+**4. Eliminate Redundancy and Focus on Interpretation:**
+*   **Stop:** Reporting the Durbin-Watson statistic. It is a technical diagnostic that adds little value to a policy-audience report and is often misinterpreted in short time series.
+*   **Start:** Focus on the "Selectivity Penalty" as the primary metric for future iterations. The current analysis shows that for Sex, the penalty is negligible. This is a crucial negative result—highlight it more prominently as evidence that gender-based inequality is primarily an "access" issue, whereas POLAR/FSM/SEN are "pipeline" issues.
 
-**Summary for Future Iterations:**
-The next iteration should focus on the "Counterfactual Check" (how many students are missing from high-tariff institutions) and the statistical comparison of the two slopes. This will move the analysis from "describing the gap" to "quantifying the institutional pipeline failure."
+**5. Future Iteration Guidance:**
+The next iteration should move away from broad descriptive statistics of all 666 rows and focus on a "Pipeline Efficiency" model. Future agents should be tasked with:
+*   Visualizing the "Pipeline" (Total Cohort -> Any HE -> High-Tariff HE) as a Sankey diagram or a stacked bar for the top 3 most unequal dimensions. This will visually demonstrate the "compounding" effect better than the current bar charts.
+*   Focusing on the *divergence* between the overall-gap slope and the conversion-gap slope as the primary indicator of systemic equity health.
 \end{FEEDBACK}
 
 
@@ -1687,28 +2413,28 @@ Report with previous results:
 Iteration 0:
 ### Summary: Benchmarking Structural Inequality in English HE (2009/10–2022/23)
 
-**Dataset & Methodology**
-- **Source:** DfE official statistics (666 rows, 14 years).
-- **Metrics:** Overall progression rate, High-Tariff progression rate, and "Conversion Ratio" (High-Tariff/Overall).
-- **Uncertainty:** 95% Wilson score intervals for rates; propagated variance for gaps; Delta Method for ratios.
-- **Trend Analysis:** Simple linear regression (slope + 95% CI) on annual gaps. 2020/21–2022/23 flagged as COVID-affected (descriptive only).
-- **Exclusions:** `Unknown` categories removed from primary analysis.
+**Data & Methodology**
+- **Source:** DfE "Widening participation in higher education" (2009/10–2022/23).
+- **Scope:** 666 rows (624 used; `Unknown` excluded). National-level aggregate rates.
+- **Metrics:** Overall progression rate, high-tariff progression rate, and "Conversion Ratio" (High-Tariff/Any HE).
+- **Uncertainty:** 95% Wilson score intervals for rates; Delta Method for ratio uncertainty.
+- **Trend Analysis:** Simple linear regression (14 annual points). 2020/21–2022/23 flagged as COVID-affected (descriptive only).
 
 **Key Findings**
-1. **Overall HE Access:** POLAR Q5–Q1 absolute gap narrowed (slope: -0.328 pp/year, p<0.001). Relative ratio improved (2.85 to 1.96).
-2. **High-Tariff Access:** Absolute POLAR gap widened (slope: +0.125 pp/year, p=0.008). Proportional inequality narrowed, but absolute exclusion remains persistent.
-3. **Compounding Disadvantage:** A "selectivity penalty" exists; for POLAR, Q5 entrants are ~1.9x more likely than Q1 entrants to attend high-tariff providers.
+1. **Overall Access:** POLAR Q5–Q1 absolute gap narrowed (33.3 pp to 30.4 pp; slope: -0.328 pp/year, p<0.001). Relative inequality also declined (ratio 2.85 to 1.96).
+2. **High-Tariff Access:** Absolute POLAR gap widened (17.3 pp to 19.7 pp; slope: +0.125 pp/year, p=0.008). Relative inequality narrowed (ratio 6.58 to 3.77) due to low Q1 baselines.
+3. **Compounding Disadvantage:** Disadvantaged groups face a "double hurdle": lower overall HE entry and a lower Conversion Ratio (e.g., POLAR Q5 entrants are 1.92x more likely to enter high-tariff providers than Q1).
 4. **Benchmarking (2022/23):** POLAR is not the sole driver. Largest absolute gaps found in **Ethnicity Minor** (72.5 pp), **SEN Provision** (41.9 pp), and **Children in Need** (34.0 pp).
 
 **Limitations & Constraints**
-- **Trend Inference:** Limited to 14 annual points; no structural-break modeling or parity projections.
-- **Data Sparsity:** Small cohorts in `Ethnicity Minor` and `Looked After Status` require cautious interpretation of extreme rankings.
+- **Trend Inference:** Limited to 14 points; no structural-break modeling or parity projections.
+- **Sparsity:** Small cohorts in `Ethnicity Minor` and vulnerable groups (e.g., Looked After) require cautious interpretation of extreme rankings.
 - **COVID-19:** Recent years show persistent high-tariff gaps; these are descriptive observations, not evidence of a new structural regime.
 
-**Strategic Guidance for Future Iterations**
-- **Focus:** Future work should shift from "any HE" to the "Conversion Ratio" to isolate institutional selection bias from pre-HE attainment barriers.
-- **Methodological Note:** The linear model is sufficient for broad trends, but residual analysis confirms it is a descriptive summary, not a predictive tool.
-- **Next Steps:** Investigate the "selectivity penalty" across non-POLAR dimensions (e.g., SEN, Care status) to determine if the compounding effect is universal or specific to area-based disadvantage.
+**Future Directions**
+- **Focus:** Shift from "any HE" to "selective pipeline" analysis, as the latter remains the primary site of widening inequality.
+- **Methodological Note:** Future agents should maintain the dual-metric framework (Access vs. Conversion) to distinguish between entry barriers and institutional selection bias.
+- **Data Handling:** Continue using absolute path `/Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv`.
         
 
 **Respond in exactly this format:**
@@ -1724,6 +2450,6 @@ In <HYPOTHESIS>, put idea/hypothesis.
 
 ###### RESPONSE [model: gemini-3.1-flash-lite] ########
 \begin{HYPOTHESIS}
-The "selectivity penalty"—the disparity in the conversion rate from any HE to high-tariff HE—is not uniform across demographic dimensions. I hypothesize that while area-based disadvantage (POLAR) shows a narrowing gap in overall access, the "selectivity penalty" remains static or widens for groups defined by systemic vulnerability (specifically SEN Status, Looked After Status, and Children in Need) compared to those defined by socioeconomic status (FSM/POLAR). By calculating the "Selectivity Elasticity" (the ratio of the high-tariff progression rate to the overall progression rate) for every category and comparing the slopes of these elasticities over time, we can identify whether the "glass ceiling" at selective institutions is a universal feature of the HE system or if it disproportionately affects specific marginalized groups regardless of their overall HE participation rates. This will reveal if policy interventions focusing on "any HE" access are inadvertently ignoring a deepening institutional stratification for the most vulnerable cohorts.
+The "Conversion Ratio" (High-Tariff/Any HE) currently treats the selective pipeline as a monolithic outcome. I hypothesize that the "High-Tariff Gap" is not merely a function of socioeconomic background, but is significantly mediated by the interaction between specific demographic characteristics (e.g., Ethnicity, SEN) and the "Any HE" baseline. By calculating the **Conditional Selectivity Elasticity**—defined as the sensitivity of the high-tariff progression rate to changes in the overall HE progression rate for each subgroup—we can identify which groups are "under-converting" relative to their own overall HE access levels. This will allow us to distinguish between groups that are excluded from the entire HE system versus those that enter HE but are systematically diverted away from high-tariff institutions. I propose mapping the **Residual Selectivity Gap**: the difference between a group's observed high-tariff rate and the rate predicted by a linear model of their overall HE progression. This will reveal if the "double hurdle" is a uniform phenomenon or if certain groups (e.g., specific ethnicities or SEN statuses) face a unique "institutional ceiling" that persists even when overall access gaps are controlled for.
 \end{HYPOTHESIS}
 
