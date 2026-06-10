@@ -1,38 +1,43 @@
-## Dataset: UCAS-style Higher Education Applications (synthetic, demo)
+## Dataset: Widening Participation in Higher Education — "All Characteristics" (DfE, real published data)
 
-A synthetic, privacy-safe dataset modelled on UCAS undergraduate admissions, designed for a "widening participation" (WP) equity analysis. No real personal data — rows are simulated applicants drawn from realistic UK marginal distributions. If a real CSV is provided at `Iteration0/input_files/data/applications.csv`, use it instead; otherwise the analysis code should first generate this synthetic table (~50,000 applicants across 5 application cycles) and save it to that path.
+**File:** `Iteration0/input_files/data/wp_all_characteristics.csv` (already present — load this; do NOT generate synthetic data).
 
-### Schema (one row per application)
-- `applicant_id`: anonymised unique id
-- `cycle_year`: application cycle (2020–2024)
-- `region`: UK region (e.g. North East, London, Scotland, Wales, ...)
-- `polar4_quintile`: POLAR4 area participation quintile, 1 (lowest HE participation) to 5 (highest). The core WP measure.
-- `imd_quintile`: Index of Multiple Deprivation quintile, 1 (most deprived) to 5 (least deprived)
-- `free_school_meals`: eligible for free school meals (0/1) — disadvantage proxy
-- `first_in_family`: first generation to apply to HE (0/1)
-- `school_type`: state comprehensive / state selective / independent / FE college
-- `ethnicity_group`: aggregated ethnicity grouping
-- `sex`: applicant sex
-- `disability_declared`: declared disability (0/1)
-- `predicted_grades_points`: UCAS tariff points from predicted A-level/equivalent grades
-- `achieved_grades_points`: UCAS tariff points from achieved grades
-- `subject_group`: applied subject area (e.g. Medicine, Engineering, Law, Creative Arts, ...)
-- `provider_tariff`: tariff group of the applied provider (higher / medium / lower tariff)
-- `offer_made`: provider made an offer (0/1)
-- `offer_accepted`: applicant firmly accepted (0/1)
-- `enrolled`: applicant enrolled (0/1) — final admission outcome
+**Provenance:** UK Department for Education, *Widening participation in higher education* official statistics (2023-24 release), obtained from Explore Education Statistics (gov.uk). Permalink:
+https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/c3f0cae9-a2f7-4363-9d48-b7a410072a6f
+Direct CSV: append `/csv` to that URL. **Licence:** Open Government Licence v3.0 (free to use/share with attribution).
+
+**Coverage:** England, national level, academic years **2009/10 → 2022/23** (14 years). The statistic measures **progression to higher education by age 19** — i.e. the percentage of a state-school cohort who enter HE — broken down by pupil characteristic. 666 data rows, tidy long format, aggregate (rates + headcounts, no personal data).
+
+### Schema (one row per year × characteristic-category)
+- `time_period` — academic year as `YYYYYY` (e.g. `201920` = 2019/20)
+- `time_identifier` — "Academic year"
+- `geographic_level`, `country_code`, `country_name` — England, national
+- `breakdown_topic` — the characteristic dimension. Values present:
+  **POLAR** (area HE-participation quintile, the core WP measure), **Disadvantage** (FSM-based disadvantage flag), **FSM Status**, **Ethnicity Major**, **Ethnicity Minor**, **Sex**, **SEN Status**, **SEN Provision**, **Looked After Status**, **Children in Need**, **First Language**
+- `breakdown` — the category within that topic, e.g. for POLAR: `Q1 - Most Disadvantaged`, `Q2`, `Q3`, `Q4`, `Q5 - Most Advantaged`, `Unknown`
+- `progression_rate` — % of the cohort progressing to **any** HE (the headline access rate)
+- `high_tariff_progression_rate` — % progressing to a **high-tariff** (selective) provider — the sharper equity measure
+- `number_of_he_students` — count progressing to HE
+- `number_of_high_tariff_he_students` — count progressing to high-tariff HE
+- `number_of_students` — cohort size (denominator)
 
 ### Research aim (widening participation)
-Quantify and explain access gaps in UK undergraduate admissions across disadvantage measures, and identify where in the funnel (offer → acceptance → enrolment) inequity arises.
+Quantify and explain access gaps in English HE progression across disadvantage measures, and track how they have changed over 14 years — with particular attention to the gap at **high-tariff** providers.
 
 Questions of interest:
-1. How do offer, acceptance, and enrolment rates vary by POLAR4 quintile, IMD quintile, FSM eligibility, and first-in-family status — and how have these gaps changed across the 2020–2024 cycles?
-2. After controlling for predicted/achieved attainment (tariff points), how much of the access gap remains attributable to background — i.e. the conditional WP gap, especially at higher-tariff providers?
-3. Which stage of the funnel contributes most to the overall enrolment gap for disadvantaged groups?
-4. Can a calibrated model predict enrolment from applicant attributes, and which features drive predicted access disparities (with fairness/equity diagnostics across protected groups)?
+1. **POLAR gap over time:** how large is the Q1 (most disadvantaged) vs Q5 (most advantaged) gap in overall progression, and how has it changed 2009/10→2022/23? Is it narrowing, static, or widening?
+2. **The high-tariff gap:** repeat (1) for `high_tariff_progression_rate`. The high-tariff gap is far wider in proportional terms (e.g. ~3% vs ~20%) — quantify the ratio and absolute gap, and its trend.
+3. **Which characteristic divides most?** Compare gap magnitudes across POLAR, FSM/Disadvantage, ethnicity, sex, SEN and looked-after status. Rank the dimensions by equity gap.
+4. **Compounding disadvantage:** for groups with both overall and high-tariff rates, show how disadvantage compounds as you move from "any HE" to "selective HE".
+5. **Convergence test:** fit simple trend lines to the Q1–Q5 gap (overall and high-tariff) and test whether the gap is closing, and if so, at what rate / projected year of parity.
 
 ### Expected outputs
-- Funnel and gap plots (offer/acceptance/enrolment rates by quintile and cycle, with confidence intervals).
-- A regression / logistic model of enrolment with attainment controls, reporting the residual conditional WP gap and effect sizes.
-- A fairness diagnostic (e.g. rate differences / ratios across POLAR4 and FSM groups) on the predictive model.
-- A concise Results narrative suitable for a policy audience.
+- Time-series gap plots: Q1 vs Q5 POLAR progression (overall and high-tariff) across cycles, with the absolute gap and gap ratio annotated.
+- A ranked comparison of equity gaps across all breakdown topics for the latest year.
+- A small trend/regression analysis of the gap over time (slope, significance, projected parity).
+- A concise, policy-audience Results narrative grounded in the real figures.
+
+### Notes for the analysis code
+- Parse `time_period` (`YYYYYY`) into a readable cycle label and an integer year for trend fitting.
+- Treat `Unknown` categories as a separate series; exclude from gap calculations unless explicitly analysing data quality.
+- Rates are percentages already; headcounts let you compute weighted/pooled figures and confidence intervals where useful.
