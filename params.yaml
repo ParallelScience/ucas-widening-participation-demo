@@ -1,0 +1,53 @@
+# Denario params — UCAS widening-participation demo (tuned for a fast live run)
+# Dataset is tiny (666 rows, ~80KB), so keep the analysis short and snappy.
+
+max_iterations: 4
+hardware_constraints: "Standard laptop. Single CPU. No GPU. Small CSV (~80KB, 666 rows)."
+
+Idea module:                 # denario_idea (LangGraph, fast)
+   idea_sampler:    { model: gemini-3.1-flash-lite, temperature: 0.7 }
+   idea_selector1:  { model: gemini-3.1-flash-lite, temperature: 0.1 }
+   idea_selector2:  { model: gemini-3.1-flash-lite, temperature: 0.1 }
+   idea_selector3:  { model: gemini-3.1-flash-lite, temperature: 0.1 }
+   idea_chooser:    { model: gemini-3.1-flash-lite, temperature: 0.1 }
+   idea_maker:      { model: gemini-3.1-flash-lite, temperature: 0.7 }
+   idea_hater:      { model: gemini-3.1-flash-lite, temperature: 0.1 }
+
+Methods module:              # denario_methods (LangGraph)
+   methods:    { model: gemini-3.1-flash-lite, temperature: 0.1 }
+   reviewer1:  { model: gemini-3.1-flash-lite, temperature: 0.1 }
+   reviewer2:  { model: gemini-3.1-flash-lite, temperature: 0.2 }
+   reviewer3:  { model: gemini-3.1-flash-lite, temperature: 0.2 }
+   improver:   { model: gemini-3.1-flash-lite, temperature: 0.2 }
+
+Analysis module:             # denario_results (cmbagent_lg) — the live centrepiece
+   max_n_steps: 4            # small + fast for the demo (raise to 6-8 for depth)
+   max_n_attempts: 8
+   code_execution_timeout: 240
+   engineer:      { model: gemini-3.5-flash, temperature: 0.1 }   # writes + runs code
+   researcher:    { model: gpt-5.4,          temperature: 0.1 }   # writes Results section
+   planner:       { model: gemini-3.5-flash, temperature: 0.1 }
+   plan_reviewer: { model: claude-sonnet-4-6 }
+   orchestration: { model: gemini-3.1-flash-lite }   # read but unused
+   evaluator:     { model: claude-sonnet-4-6 }        # judges each step
+   enable_vlm_review: true                            # visually checks the figures live
+   vlm_model:     { model: gemini-3.1-flash-lite }    # vision-capable
+   max_vlm_review_attempts: 2
+
+Paper module:                # denario_paper (LangGraph + latexmk)
+   keywords_writer:  { model: gemini-3.1-flash-lite, temperature: 0.1 }
+   section_writer:   { model: gemini-2.5-pro,        temperature: 0.1 }
+   refiner:          { model: gemini-2.5-pro,        temperature: 0.1 }
+   audio_summarizer: { model: gemini-3.1-flash-lite, temperature: 0.3 }
+
+Citations:                   # only when denario_paper(add_citations=True)
+   backend: valency
+   citation_inserter: { model: gemini-3.1-flash-lite, temperature: 0.1 }
+
+Evaluator module:            # denario_evaluate
+   reporter:               { model: gemini-3.1-flash-lite, temperature: 0.1 }
+   idea_reviewer:          { model: gemini-3.1-flash-lite, temperature: 0.2 }
+   methods_reviewer:       { model: gemini-3.1-flash-lite, temperature: 0.2 }
+   input_reviewer:         { model: gemini-3.1-flash-lite, temperature: 0.2 }
+   new_iteration_reviewer: { model: gemini-3.1-flash-lite, temperature: 0.1 }
+   results_reviewer:       { model: gemini-3.1-flash-lite, temperature: 0.2 }
