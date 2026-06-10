@@ -1,6 +1,6 @@
 ## Dataset: Widening Participation in Higher Education — "All Characteristics" (DfE, real published data)
 
-**File:** `Iteration0/input_files/data/wp_all_characteristics.csv` (already present — load this; do NOT generate synthetic data).
+**File (absolute path — load exactly this):** `/Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv` (already present — load this; do NOT generate synthetic data). The analysis code runs from a different working directory, so always use this absolute path, never a relative one.
 
 **Provenance:** UK Department for Education, *Widening participation in higher education* official statistics (2023-24 release), obtained from Explore Education Statistics (gov.uk). Permalink:
 https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/c3f0cae9-a2f7-4363-9d48-b7a410072a6f
