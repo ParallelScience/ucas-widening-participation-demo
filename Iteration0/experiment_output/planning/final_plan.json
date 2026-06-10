@@ -1,0 +1,58 @@
+{
+  "sub_tasks": [
+    {
+      "sub_task": "Data Preparation, Uncertainty Estimation, and Metric Calculation",
+      "sub_task_agent": "engineer",
+      "bullet_points": [
+        "Load the dataset from the absolute path /Users/boris/Desktop/ucas-widening-participation/Iteration0/input_files/data/wp_all_characteristics.csv.",
+        "Parse time_period (YYYYYY) into both a clean integer year (e.g. 2019 for 201920) and a human-readable academic cycle label (e.g. \"2019/20\"), retaining both in all saved outputs.",
+        "Filter out Unknown categories before primary gap or ratio calculations and store them separately for data-quality validation.",
+        "Perform a data sparsity check on cohort sizes across breakdown topics (e.g., Looked After Status) and flag subgroups with small cohorts to contextualize high volatility.",
+        "Calculate 95% Wilson score confidence intervals for all overall progression rates and high-tariff progression rates directly from raw headcount columns using statsmodels.stats.proportion.proportion_confint with method='wilson'.",
+        "Calculate the \"Conversion Ratio\" (number_of_high_tariff_he_students / number_of_he_students) for each subgroup and propagate its uncertainty.",
+        "Compute overall and high-tariff absolute gaps (Q5 - Q1) and relative ratios (Q5 / Q1) for the POLAR topic, calculating propagated confidence intervals for both difference (sum of variances) and ratio metrics (Delta Method).",
+        "Save all processed datasets, metrics, and uncertainty bounds to structured CSV files flat under data/."
+      ],
+      "code_execution_timeout": 240
+    },
+    {
+      "sub_task": "Trend Fitting and Cross-Dimensional Benchmarking",
+      "sub_task_agent": "engineer",
+      "bullet_points": [
+        "Load the processed tables from Step 1.",
+        "Define a consistent 'most disadvantaged vs. most advantaged' pairing rule for every available breakdown_topic and document this logic in the saved output.",
+        "For the latest academic year (2022/23), calculate the absolute and relative gaps between these pairings for every available breakdown topic, and rank the dimensions by gap magnitude.",
+        "Fit a simple linear regression using scipy.stats.linregress or statsmodels.OLS to the POLAR Q1 vs Q5 absolute and relative gaps (overall and high-tariff) over the 14-year period.",
+        "Extract and save regression outputs containing slope, intercept, standard error, t-statistic, p-value, and 95% CI bounds as distinct columns. Evaluate linearity using basic residual checks.",
+        "Save the trend coefficients, regression summary statistics, and cross-dimensional rankings to structured CSV files flat under data/."
+      ],
+      "code_execution_timeout": 240
+    },
+    {
+      "sub_task": "Scientific Visualization and Figure Generation",
+      "sub_task_agent": "engineer",
+      "bullet_points": [
+        "Load the calculated metrics, gaps, trends, and rankings from Steps 1 and 2.",
+        "Generate a high-quality time-series plot of POLAR Q1 vs Q5 overall and high-tariff progression rates, including shaded Wilson confidence interval bands and the fitted linear trend line with its 95% confidence band overlaid. Mark the COVID-affected period (2020/21 onwards) with a shaded band or annotation.",
+        "Generate a ranked bar chart of equity gaps across all breakdown topics for the latest year (2022/23).",
+        "Generate a compounding disadvantage plot as a dumbbell or side-by-side chart showing overall and high-tariff progression rates side-by-side, with the absolute drop-off annotated.",
+        "Save all plots flat under data/ (e.g. data/polar_trend_gaps.png, data/equity_benchmarking.png, data/compounding_disadvantage.png)."
+      ],
+      "code_execution_timeout": 240
+    },
+    {
+      "sub_task": "Synthesis and Policy-Audience Results Reporting",
+      "sub_task_agent": "researcher",
+      "bullet_points": [
+        "Load specific CSV files containing regression coefficients, cross-dimensional rankings, and review the plots generated flat under data/.",
+        "Write a comprehensive, policy-oriented Results report synthesizing the quantitative findings.",
+        "Detail the POLAR gap trajectory, highlighting the contrast between overall access trends and high-tariff \"Conversion Ratio\" trends.",
+        "Contrast and interpret the slopes and 95% confidence intervals for both absolute and relative gaps, explaining whether the gap is widening, narrowing, or static based on whether the 95% CI on the slope excludes zero.",
+        "Present the cross-dimensional equity benchmarking results, ranking pupil characteristics by the severity of the barrier.",
+        "Frame trend results carefully: avoid extrapolating parity years or treating the COVID-affected period as a structural break; instead, frame the 2020/21–2022/23 period descriptively with appropriate policy context.",
+        "Structure the narrative with clear references to the specific figures and tables generated, ensuring the prose is fully grounded in the real, computed numbers."
+      ],
+      "code_execution_timeout": null
+    }
+  ]
+}

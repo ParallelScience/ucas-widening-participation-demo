@@ -27,11 +27,11 @@ Analysis module:             # denario_results (cmbagent_lg) — the live centre
    engineer:      { model: gemini-3.5-flash, temperature: 0.1 }   # writes + runs code
    researcher:    { model: gpt-5.4,          temperature: 0.1 }   # writes Results section
    planner:       { model: gemini-3.5-flash, temperature: 0.1 }
-   plan_reviewer: { model: claude-sonnet-4-6 }
-   orchestration: { model: gemini-3.1-flash-lite }   # read but unused
-   evaluator:     { model: claude-sonnet-4-6 }        # judges each step
+   plan_reviewer: { model: claude-sonnet-4-6, temperature: 0.1 }
+   orchestration: { model: gemini-3.1-flash-lite, temperature: 0.1 }   # read but unused
+   evaluator:     { model: claude-sonnet-4-6, temperature: 0.1 }        # judges each step
    enable_vlm_review: true                            # visually checks the figures live
-   vlm_model:     { model: gemini-3.1-flash-lite }    # vision-capable
+   vlm_model:     { model: gemini-3.1-flash-lite, temperature: 0.1 }    # vision-capable
    max_vlm_review_attempts: 2
 
 Paper module:                # denario_paper (LangGraph + latexmk)
@@ -51,3 +51,5 @@ Evaluator module:            # denario_evaluate
    input_reviewer:         { model: gemini-3.1-flash-lite, temperature: 0.2 }
    new_iteration_reviewer: { model: gemini-3.1-flash-lite, temperature: 0.1 }
    results_reviewer:       { model: gemini-3.1-flash-lite, temperature: 0.2 }
+   plan_consistency_reviewer: { model: gemini-3.1-flash-lite, temperature: 0.2 }
+   code_consistency_reviewer: { model: gemini-3.1-flash-lite, temperature: 0.2 }

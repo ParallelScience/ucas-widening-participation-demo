@@ -1,0 +1,7 @@
+The dataset description and the provided results are consistent; the observed limitations in the analysis are directly attributable to the constraints defined in the dataset description.
+
+1. **Limited temporal resolution**: The dataset contains only 14 annual data points. As noted in the "Notes for the analysis code," this constraint correctly led to the exclusion of structural-break models and parity extrapolations, limiting the analysis to simple linear trends. The results appropriately reflect this by treating the COVID-affected years as descriptive observations rather than a new regime.
+
+2. **Data aggregation and sparsity**: The dataset consists of 666 aggregate rows rather than individual-level data. The "Results" section correctly identifies that this limits the precision of findings for small subgroups (e.g., "Ethnicity Minor" and "Looked After Status"). The analysis appropriately flags these as sensitive to small-number variation, which explains why the ranking of these groups is interpreted as a marker of inequality rather than a precision-equivalent comparison to broader categories.
+
+3. **Scope of variables**: The dataset provides aggregate rates and headcounts but lacks individual-level covariates. This constraint explains why the analysis could not perform multivariable modeling to isolate the independent effects of different characteristics (e.g., controlling for ethnicity within POLAR quintiles), necessitating the use of descriptive benchmarking and "Conversion Ratio" comparisons instead.

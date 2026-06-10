@@ -1,0 +1,37 @@
+# returncode=0 timed_out=False elapsed=0.6960s
+--- stdout ---
+Loading processed clean dataset from: data/wp_processed_clean.csv
+Loading POLAR gap trends from: data/polar_gap_trends.csv
+
+--- CROSS-DIMENSIONAL EQUITY BENCHMARKING (Latest Year: 2022/23) ---
+Saved cross-dimensional benchmarking rankings to: data/cross_dimensional_rankings.csv
+Schema: ['breakdown_topic', 'advantaged_category', 'disadvantaged_category', 'overall_advantaged_rate', 'overall_disadvantaged_rate', 'overall_abs_gap', 'overall_rel_ratio', 'high_tariff_advantaged_rate', 'high_tariff_disadvantaged_rate', 'high_tariff_abs_gap', 'high_tariff_rel_ratio']
+
+Ranked Equity Gaps across Breakdown Topics (2022/23):
+    breakdown_topic                    advantaged_category                          disadvantaged_category  overall_abs_gap  overall_rel_ratio  high_tariff_abs_gap  high_tariff_rel_ratio
+    Ethnicity Minor                                Chinese                     Traveller of Irish Heritage             72.5           7.304348                 44.1               9.647059
+      SEN Provision                       No SEN provision                 Education, health and care plan             41.9           5.505376                 15.5              10.687500
+   Children in Need                       All Other Pupils                                Children in Need             34.0           3.428571                 14.0               8.000000
+Looked After Status                       All Other Pupils Looked after continuously for 12 months or more             32.0           3.133333                 13.0               7.500000
+         SEN Status No Identified special educational need                    Any special educational need             30.5           2.473430                 12.8               3.976744
+              POLAR                   Q5 - Most Advantaged                         Q1 - Most Disadvantaged             30.4           1.958991                 19.7               3.774648
+    Ethnicity Major                  Asian / Asian British                                           White             26.6           1.636364                 10.4               1.759124
+         FSM Status                       All Other Pupils                               Free School Meals             20.8           1.717241                 10.7               2.754098
+       Disadvantage                       All Other Pupils                                   Disadvantaged             19.9           1.623824                 11.2               2.623188
+     First Language                     Other than English                                         English             17.1           1.388636                  4.1               1.280822
+                Sex                                 Female                                            Male             13.2           1.326733                  4.5               1.343511
+
+--- POLAR GAP TREND REGRESSION ANALYSIS (2009/10 to 2022/23) ---
+
+Saved regression analysis results to: data/regression_results.csv
+Schema: ['metric', 'slope', 'slope_stderr', 'slope_95_low', 'slope_95_high', 'intercept', 'r_squared', 'p_value', 'durbin_watson', 'rmse']
+
+POLAR Gap Linear Trend Fitting Statistics:
+               metric     slope  slope_stderr  slope_95_low  slope_95_high   intercept  r_squared      p_value  durbin_watson     rmse
+      overall_abs_gap -0.327692      0.038468     -0.411507      -0.243878  692.256703   0.858099 1.965406e-06       1.877645 0.537177
+    overall_rel_ratio -0.074205      0.003835     -0.082560      -0.065851  151.900267   0.968952 2.048346e-10       0.695040 0.053546
+  high_tariff_abs_gap  0.124835      0.039011      0.039837       0.209833 -233.705275   0.460431 7.632599e-03       1.979305 0.544760
+high_tariff_rel_ratio -0.229635      0.012015     -0.255814      -0.203457  468.278615   0.968194 2.368153e-10       1.531422 0.167781
+
+--- stderr ---
+
